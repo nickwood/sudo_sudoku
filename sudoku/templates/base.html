@@ -7,7 +7,14 @@
     {% endblock %}
 </head>
 <body>
-    <div id="navbar">navbar</div>
+    <div id="navbar">
+        <ul>
+            <li><p>Sudo&nbsp;Sudoku</p></li>
+            <li><a href="/solve">Solve</a></li>
+            <li><a href="/generate">Generate</a></li>
+            <li><a href="/analyse">Analyse</a></li>
+        </ul>
+    </div>
     <div id="content">
         <div id="game">
             <table id="grid" style="border-collapse: collapse;">
@@ -119,7 +126,8 @@
 
     <div id="footer">
         {% block footer %}
-        &copy; Copyright 2020 by <a href="https://github.com/nickwood">Nick Wood</a>.
+        This work is licensed under the terms of the <a href="https://opensource.org/licenses/MIT">MIT license</a><br>
+        Full source is available on <a href="https://github.com/nickwood/sudo_sudoku">GitHub</a>.
         {% endblock %}
     </div>
 </body>

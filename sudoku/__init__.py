@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 from flask_scss import Scss
+from .solver import split_post_data, invalid
 
 
 def create_app(test_config=None):
@@ -11,10 +12,20 @@ def create_app(test_config=None):
     @app.route('/solve', methods=['GET', 'POST'])
     def solve():
         if request.method == 'GET':
-            return render_template('solve.html')
+            return render_template('base.html')
         else:
-            post_data = request.form
-            return render_template('solve.html', data=post_data)
+            grid, params = split_post_data(post_data=dict(request.form))
+            invalid_cells = invalid(grid=grid)
+            if invalid:
+                errors = ['Invalid entries at: ' + ', '.join(invalid_cells)]
+            else:
+                errors = None
+
+            return render_template('base.html',
+                                   grid=grid,
+                                   params=params,
+                                   errors=errors,
+                                   invalid=invalid_cells)
 
     @app.route('/generate')
     def generate():
@@ -25,8 +36,7 @@ def create_app(test_config=None):
         if request.method == 'GET':
             return render_template('analyse.html')
         else:
-            post_data = request.form
-            return render_template('analyse.html', data=post_data)
-
+            data = request.form
+            return render_template('analyse.html', data=data)
 
     return app

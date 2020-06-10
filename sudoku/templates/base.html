@@ -15,28 +15,37 @@
             <li><a href="/analyse">Analyse</a></li>
         </ul>
     </div>
+    {% if grid is not defined %}
+    {% set grid = {} %}
+    {% endif %}
+    {% if invalid is not defined %}
+    {% set invalid = [] %}
+    {% endif %}
+    {% if errors is defined and errors is not none %}
+    <div id="messages">
+        {% for err in errors %}
+        <p>{{ err }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
     <div id="content">
     <form id="interface" action="/solve" method="post">
         <div id="game">
+
             <table id="grid" style="border-collapse: collapse;">
-            {% if data == None %}
-                {% for row in range(1, 10) %}
-                    <tr class="row">
-                    {% for col in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'] %}
-                        <td class="cell"><input type="text" name="{{ col + row|string }}" maxlength="1"></td>
-                    {% endfor %}
-                    </tr>
+            {% for row in '123456789' %}
+            <tr class="row">
+                {% for col in 'ABCDEFGHJ' %}
+                    {% set cell = col + row|string %}
+                    <td class="cell">
+                        <input class="{{ 'invalid' if cell in invalid }}" 
+                        type="text" name="{{ cell }}" 
+                        value="{{ grid.get(cell, '') }}" 
+                        maxlength="1">
+                    </td>
                 {% endfor %}
-            {% else %}
-                {% for row in range(1, 10) %}
-                <tr class="row">
-                    {% for col in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'] %}
-                        {% set cell = col + row|string %}
-                        <td class="cell"><input type="text" name="{{ cell }}" value="{{ data[cell] }}" maxlength="1"></td>
-                    {% endfor %}
-                    </tr>
-                {% endfor %}
-            {% endif %}
+                </tr>
+            {% endfor %}
             </table>
         </div>
         <div id="controls">

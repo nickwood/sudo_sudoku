@@ -3,7 +3,7 @@
 <head>
     {% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
-    <title>{% block title %}{% endblock %} - My Webpage</title>
+    <title>Sudo Sudoku</title>
     {% endblock %}
 </head>
 <body>
@@ -16,114 +16,36 @@
         </ul>
     </div>
     <div id="content">
+    <form id="interface" action="/solve" method="post">
         <div id="game">
             <table id="grid" style="border-collapse: collapse;">
+            {% if data == None %}
+                {% for row in range(1, 10) %}
+                    <tr class="row">
+                    {% for col in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'] %}
+                        <td class="cell"><input type="text" name="{{ col + row|string }}" maxlength="1"></td>
+                    {% endfor %}
+                    </tr>
+                {% endfor %}
+            {% else %}
+                {% for row in range(1, 10) %}
                 <tr class="row">
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                </tr>
-                <tr class="row">
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                </tr>
-                <tr class="row">
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                </tr>
-                <tr class="row">
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                </tr>
-                <tr class="row">
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                </tr>
-                <tr class="row">
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                </tr>
-                <tr class="row">
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                </tr>
-                <tr class="row">
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                </tr>
-                <tr class="row">
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                    <td class="cell"><input type="text" maxlength="1"></td>
-                </tr>
-     </table>
+                    {% for col in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'] %}
+                        {% set cell = col + row|string %}
+                        <td class="cell"><input type="text" name="{{ cell }}" value="{{ data[cell] }}" maxlength="1"></td>
+                    {% endfor %}
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            </table>
         </div>
         <div id="controls">
-        {% block controls %}{% endblock %}
+            {% block controls %}{% endblock %}
+            <button type="submit">solve</button>
+            <!-- <button type="submit" formaction="analyse">analyse</button> -->
         </div>
+    </form>
     </div>
-
     <div id="footer">
         {% block footer %}
         This work is licensed under the terms of the <a href="https://opensource.org/licenses/MIT">MIT license</a><br>

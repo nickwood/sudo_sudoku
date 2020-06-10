@@ -1,8 +1,11 @@
 from flask import Flask, render_template, request
+from flask_scss import Scss
 
 
 def create_app(test_config=None):
     app = Flask(__name__)
+
+    Scss(app)
 
     @app.route('/')
     @app.route('/solve', methods=['GET', 'POST'])

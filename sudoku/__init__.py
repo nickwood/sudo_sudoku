@@ -16,7 +16,7 @@ def create_app(test_config=None):
         else:
             grid, params = split_post_data(post_data=dict(request.form))
             invalid_cells = invalid(grid=grid)
-            if invalid:
+            if invalid_cells:
                 errors = ['Invalid entries at: ' + ', '.join(invalid_cells)]
             else:
                 errors = None

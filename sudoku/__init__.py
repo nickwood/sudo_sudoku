@@ -1,42 +1,35 @@
-from flask import Flask, render_template, request
+from flask import Flask, request
 from flask_scss import Scss
-from .solver import split_post_data, invalid
+import sudoku.response_generators as response
 
 
 def create_app(test_config=None):
     app = Flask(__name__)
-
     Scss(app)
 
     @app.route('/')
     @app.route('/solve', methods=['GET', 'POST'])
-    def solve():
+    def solve_sudoku():
         if request.method == 'GET':
-            return render_template('base.html')
+            demo = {'A1': '5', 'A2': '6', 'A4': '8', 'A5': '4', 'A6': '7',
+                    'B1': '3', 'B3': '9', 'B7': '6', 'C3': '8', 'D2': '1',
+                    'D5': '8', 'D8': '4', 'E1': '7', 'E2': '9', 'E4': '6',
+                    'E6': '2', 'E8': '1', 'E9': '8', 'F2': '5', 'F5': '3',
+                    'F8': '9', 'G7': '2', 'H3': '6', 'H7': '8', 'H9': '7',
+                    'J4': '3', 'J5': '1', 'J6': '6', 'J8': '5', 'J9': '9'}
+            return response.home(grid=demo)
         else:
-            grid, params = split_post_data(post_data=dict(request.form))
-            invalid_cells = invalid(grid=grid)
-            if invalid_cells:
-                errors = ['Invalid entries at: ' + ', '.join(invalid_cells)]
-            else:
-                errors = None
-
-            return render_template('base.html',
-                                   grid=grid,
-                                   params=params,
-                                   errors=errors,
-                                   invalid=invalid_cells)
+            return response.do_solve(post_data=request.form)
 
     @app.route('/generate')
-    def generate():
-        return render_template('generate.html')
+    def generate_route():
+        return response.generate()
 
     @app.route('/analyse', methods=['GET', 'POST'])
-    def analyse():
+    def analyse_route():
         if request.method == 'GET':
-            return render_template('analyse.html')
+            pass
         else:
-            data = request.form
-            return render_template('analyse.html', data=data)
+            return response.analyse(post_data=request.form)
 
     return app

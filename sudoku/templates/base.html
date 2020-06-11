@@ -18,7 +18,7 @@
     {% if grid is not defined %}
     {% set grid = {} %}
     {% endif %}
-    {% if invalid is not defined %}
+    {% if invalid is not defined or invalid is none %}
     {% set invalid = [] %}
     {% endif %}
     {% if errors is defined and errors is not none %}
@@ -31,7 +31,6 @@
     <div id="content">
     <form id="interface" action="/solve" method="post">
         <div id="game">
-
             <table id="grid" style="border-collapse: collapse;">
             {% for row in '123456789' %}
             <tr class="row">

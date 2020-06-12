@@ -9,6 +9,7 @@ COL_GROUPS = ['ABC', 'DEF', 'GHJ']
 ROW_GROUPS = ['123', '456', '789']
 
 
+# TODO: consider moving to response_generators
 def split_post(*, post_data):
     '''The raw post data conatins our entire form, which is a bit cumbersome
     to work with. This helper functrion splits it into two dicts, one contains
@@ -33,7 +34,11 @@ def grid_iterator():
     return (col + row for row in ALL_ROWS for col in ALL_COLS)
 
 
-ALL_CELLS = frozenset([cell for cell in grid_iterator()])
+def group_iterator():
+    for c in ['A1', 'D2', 'G3', 'B4', 'E5', 'H6', 'C7', 'F8', 'J9']:
+        yield cells_in_row(cell=c)
+        yield cells_in_col(cell=c)
+        yield cells_in_box(cell=c)
 
 
 @lru_cache(None)
@@ -75,51 +80,71 @@ class Game:
         self.initial_grid = grid.copy()
         self.grid = grid
         self.params = params
+        self.errors = set()
+        self.invalid_cells = set()
 
     def initialise_candidates(self):
         candidates = defaultdict(set)
         grid = self.grid
         for cell in grid_iterator():
             if grid.get(cell, '') == '':
-                values = set(ALL_VALUES - self.neighbour_values(cell=cell))
+                neighbours = all_neighbours(cell=cell)
+                values = self.values_not_in_group(group=neighbours)
                 candidates[cell] = values
-        self.candidates_ = candidates
+        self.candidates_ = dict(candidates)
 
     def solve(self):
         self.initialise_candidates()
         old_state = None
         while old_state != self.grid:
             old_state = self.grid.copy()
-            if entries := self.find_naked_singles():
+            self.solve_step()
+            if self.errors:
+                return False
+        if self.is_solved():
+            return True
+        else:
+            self.add_error(msg='Unable to solve with current methods')
+            return False
+
+    def is_solved(self):
+        for group in group_iterator():
+            if self.values_in_group(group=group) != ALL_VALUES:
+                return False
+        return True
+
+    def solve_step(self):
+        for method in [self.find_naked_singles, self.find_hidden_singles]:
+            if entries := method():
                 for (c, v) in entries:
                     self.add_to_grid(cell=c, value=v)
-        return False
+                break
+        for cell, candidates in self.candidates_.items():
+            if candidates == set():
+                msg = 'No remaining candidates for %s' % cell
+                self.add_error(msg=msg, cell=cell)
+
+    def add_error(self, *, msg, cell=None):
+        self.errors.add(msg)
+        if cell:
+            self.invalid_cells.add(cell)
 
     def add_to_grid(self, *, cell, value):
+        '''update the grid with the given cell & value, also removes this value
+        from the list of candidates for all it's neighbours'''
         self.grid[cell] = value
-
-        # update candidates
         del self.candidates_[cell]
         for n in all_neighbours(cell=cell):
             if n in self.candidates_ and value in self.candidates_[n]:
                 self.candidates_[n].remove(value)
 
-    def values_in_cells(self, *, cells):
+    def values_in_group(self, *, group):
         '''takes an iterator of cell references and returns the unique values
         occupying those cells (ignores empty cells)'''
-        return set(self.grid.get(c, None) for c in cells) - {None}
+        return set(self.grid.get(c, None) for c in group) - {None}
 
-    def values_in_row(self, *, cell):
-        return self.values_in_cells(cells=cells_in_row(cell=cell))
-
-    def values_in_col(self, *, cell):
-        return self.values_in_cells(cells=cells_in_col(cell=cell))
-
-    def values_in_box(self, *, cell):
-        return self.values_in_cells(cells=cells_in_box(cell=cell))
-
-    def neighbour_values(self, *, cell):
-        return self.values_in_cells(cells=all_neighbours(cell=cell))
+    def values_not_in_group(self, *, group):
+        return set(ALL_VALUES - self.values_in_group(group=group))
 
     # solvers
 
@@ -130,3 +155,23 @@ class Game:
                 val, = values
                 naked_singles.append((cell, val))
         return naked_singles
+
+    def find_hidden_singles(self):
+        hidden_singles = {}
+
+        for group in group_iterator():
+            hidden_candidates = defaultdict(set)
+            for c in (group & self.candidates_.keys()):
+                for v in self.candidates_[c]:
+                    hidden_candidates[v].add(c)
+
+            for val, cells in hidden_candidates.items():
+                if len(cells) == 1:
+                    cell, = cells
+                    if cell not in hidden_singles:
+                        hidden_singles[cell] = val
+                    elif hidden_singles[cell] != val:
+                        hidden_singles[cell] = ''
+                        msg = 'Conflicting hidden single at %s' % cell
+                        self.add_error(msg=msg, cell=cell)
+        return hidden_singles.items()

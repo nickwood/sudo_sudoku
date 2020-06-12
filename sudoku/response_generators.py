@@ -24,17 +24,12 @@ def do_solve(*, post_data):
                                invalid=invalid_cells)
 
     to_solve = Game(grid=initial_grid, params=params)
-    if to_solve.solve():
-        return render_template('base.html',
-                               grid=to_solve.solution,
-                               params=params,
-                               errors=None)
-    else:
-        errors = ['Could not solve']
-        return render_template('base.html',
-                               grid=to_solve.grid,
-                               params=params,
-                               errors=None)
+    to_solve.solve()
+    return render_template('base.html',
+                           grid=to_solve.grid,
+                           params=params,
+                           errors=to_solve.errors,
+                           invalid=to_solve.invalid_cells)
 
 
 def generate():

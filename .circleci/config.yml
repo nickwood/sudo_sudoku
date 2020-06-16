@@ -1,5 +1,8 @@
 version: 2
 
+orbs:
+  heroku: circleci/heroku@1.0.1 
+
 jobs:
   build:
     working_directory: ~/sudoku
@@ -20,3 +23,11 @@ jobs:
       - store_artifacts:
           path: /home/circleci/sudoku/build_artifacts/
           destination: build_artifacts
+
+jobs:
+  deploy: 
+  executor: heroku/default
+    steps:
+      - checkout
+      - heroku/install
+      - heroku/deploy-via-git

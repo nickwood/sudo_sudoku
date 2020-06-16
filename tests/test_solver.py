@@ -2,13 +2,13 @@ from collections.abc import Iterable
 from unittest.mock import Mock
 from sudoku import solver
 
-
-def test_split_post():
-    pd = {'A1': 3, 'B2': 3, 'H7': 'a', 'other': 'test', 'brute': True}
-    grid, other = (solver.split_post(post_data=pd))
-    pd['A1'] = 5
-    assert grid == {'A1': 3, 'B2': 3, 'H7': 'a'}
-    assert other == {'other': 'test', 'brute': True}
+# TODO: move to response_gen tests
+# def test_split_post():
+#     pd = {'A1': 3, 'B2': 3, 'H7': 'a', 'other': 'test', 'brute': True}
+#     grid, other = (solver.split_post(post_data=pd))
+#     pd['A1'] = 5
+#     assert grid == {'A1': 3, 'B2': 3, 'H7': 'a'}
+#     assert other == {'other': 'test', 'brute': True}
 
 
 def test_invalid():
@@ -125,9 +125,12 @@ TEST_GRID = {'A1': '5', 'A2': '6', 'A4': '8', 'A5': '4', 'A6': '7', 'B1': '3',
              'F2': '5', 'F5': '3', 'F8': '9', 'G7': '2', 'H3': '6', 'H7': '8',
              'H9': '7', 'J4': '3', 'J5': '1', 'J6': '6', 'J8': '5', 'J9': '9'}
 
+DEFAULT_PARAMS = {'find_naked_singles': True,
+                  'find_hidden_singles': True,
+                  'find_naked_pairs': True}
 
 class GameInstance():
-    def __init__(self, grid=TEST_GRID, params=None):
+    def __init__(self, grid=TEST_GRID, params=DEFAULT_PARAMS):
         self.grid = grid.copy()
         self.params = params
 

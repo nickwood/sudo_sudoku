@@ -22,7 +22,7 @@ jobs:
           path: /home/circleci/sudoku/build_artifacts/
           destination: build_artifacts
   deploy: 
-    executor: heroku/default
+    executor: docker
     steps:
       - checkout
       - heroku/install

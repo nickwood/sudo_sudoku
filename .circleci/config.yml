@@ -9,7 +9,10 @@ jobs:
       - checkout
       - run: pip install pipenv
       - run: pipenv install --dev
+      - run: mkdir build_artifacts
+      - run: pipenv run flake8 > build_artifacts/flake8.txt
+      - run: pipenv run radon cc sudoku -a > build_artifacts/radon.txt
       - run: pipenv run pytest
       - store_artifacts:
-          path: /home/circleci/sudoku/test_results/junit.xml
+          path: /home/circleci/sudoku/build_artifacts/junit.xml
           destination: junit.xml

@@ -1,4 +1,4 @@
-from collections import defaultdict, ChainMap
+from collections import defaultdict
 from functools import lru_cache
 
 
@@ -96,7 +96,7 @@ class Game:
         return [m for k, m in methods.items()
                 if params.get(k) is True or params.get(k) == 'True']
 
-    def initialise_candidates(self):  #  TODO: move to __init__
+    def initialise_candidates(self):  # TODO: move to __init__
         candidates = defaultdict(set)
         grid = self.grid
         for cell in grid_iterator():

@@ -129,6 +129,7 @@ DEFAULT_PARAMS = {'find_naked_singles': True,
                   'find_hidden_singles': True,
                   'find_naked_pairs': True}
 
+
 class GameInstance():
     def __init__(self, grid=TEST_GRID, params=DEFAULT_PARAMS):
         self.grid = grid.copy()

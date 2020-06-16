@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 orbs:
   heroku: circleci/heroku@1.0.1
 
@@ -7,9 +7,12 @@ workflows:
   build_and_deploy:
     jobs:
       - build
-      - deploy:
+      - heroku/deploy-via-git:
           requires:
             - build
+          filters:
+            branches:
+              only: master
 
 jobs:
   build:
@@ -31,12 +34,3 @@ jobs:
       - store_artifacts:
           path: /home/circleci/sudoku/build_artifacts/
           destination: build_artifacts
-  deploy: 
-    working_directory: ~/sudoku
-    docker:
-      - image: circleci/python:3.8.2
-    executor: docker
-    steps:
-      - checkout
-      - heroku/install
-      - heroku/deploy-via-git

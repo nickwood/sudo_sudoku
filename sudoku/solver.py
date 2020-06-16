@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, ChainMap
 from functools import lru_cache
 
 
@@ -7,18 +7,6 @@ ALL_ROWS = frozenset('123456789')
 ALL_VALUES = frozenset('123456789')
 COL_GROUPS = ['ABC', 'DEF', 'GHJ']
 ROW_GROUPS = ['123', '456', '789']
-
-
-# TODO: consider moving to response_generators
-def split_post(*, post_data):
-    '''The raw post data conatins our entire form, which is a bit cumbersome
-    to work with. This helper functrion splits it into two dicts, one contains
-    the grid information, and the other contains everything else (e.g. solver
-    contraints)'''
-    grid_keys = set([k for k in grid_iterator()])
-    grid_data = {key: post_data[key] for key in post_data.keys() & grid_keys}
-    other_data = {key: post_data[key] for key in post_data.keys() - grid_keys}
-    return grid_data, other_data
 
 
 def invalid(*, grid):
@@ -42,19 +30,25 @@ def group_iterator():
 
 
 @lru_cache(None)
-def cells_in_row(*, cell):
+def cells_in_row(*, cell, inc=True):
     _, row = cell
-    return frozenset(col + row for col in ALL_COLS)
+    if inc:
+        return frozenset(col + row for col in ALL_COLS)
+    else:
+        return frozenset(col + row for col in ALL_COLS) - {cell}
 
 
 @lru_cache(None)
-def cells_in_col(*, cell):
+def cells_in_col(*, cell, inc=True):
     col, _ = cell
-    return frozenset(col + row for row in ALL_ROWS)
+    if inc:
+        return frozenset(col + row for row in ALL_ROWS)
+    else:
+        return frozenset(col + row for row in ALL_ROWS) - {cell}
 
 
 @lru_cache(None)
-def cells_in_box(*, cell):
+def cells_in_box(*, cell, inc=True):
     for i in COL_GROUPS:
         if cell[0] in i:
             col_group = i
@@ -65,25 +59,44 @@ def cells_in_box(*, cell):
             row_group = j
             break
 
-    return frozenset(col + row for row in row_group for col in col_group)
+    box = frozenset(col + row for row in row_group for col in col_group)
+    if inc:
+        return box
+    else:
+        return box - {cell}
 
 
 @lru_cache(None)
-def all_neighbours(*, cell):
-    return (cells_in_row(cell=cell) |
-            cells_in_col(cell=cell) |
-            cells_in_box(cell=cell))
+def all_neighbours(*, cell, inc=True):
+    return (cells_in_row(cell=cell, inc=inc) |
+            cells_in_col(cell=cell, inc=inc) |
+            cells_in_box(cell=cell, inc=inc))
+
+
+def common_neighbours(*, cells, inc=True):
+    neighbourhoods = [all_neighbours(cell=c, inc=inc)
+                      for c in cells]
+    return frozenset.intersection(*neighbourhoods)
 
 
 class Game:
-    def __init__(self, *, grid, params):
+    def __init__(self, *, grid, params=None):
         self.initial_grid = grid.copy()
         self.grid = grid
         self.params = params
         self.errors = set()
         self.invalid_cells = set()
+        self.candidates_ = None
+        self.solvers = self.init_solvers(params=params)
 
-    def initialise_candidates(self):
+    def init_solvers(self, *, params):
+        methods = {'find_naked_singles': self.find_naked_singles,
+                   'find_hidden_singles': self.find_hidden_singles,
+                   'find_naked_pairs': self.find_naked_pairs}
+        return [m for k, m in methods.items()
+                if params.get(k) is True or params.get(k) == 'True']
+
+    def initialise_candidates(self):  #  TODO: move to __init__
         candidates = defaultdict(set)
         grid = self.grid
         for cell in grid_iterator():
@@ -114,7 +127,9 @@ class Game:
         return True
 
     def solve_step(self):
-        for method in [self.find_naked_singles, self.find_hidden_singles]:
+        if self.candidates_ is None:
+            self.initialise_candidates()
+        for method in self.solvers:
             if entries := method():
                 for (c, v) in entries:
                     self.add_to_grid(cell=c, value=v)
@@ -122,21 +137,25 @@ class Game:
         for cell, candidates in self.candidates_.items():
             if candidates == set():
                 msg = 'No remaining candidates for %s' % cell
-                self.add_error(msg=msg, cell=cell)
+                self.add_error(msg=msg, cells={cell})
 
-    def add_error(self, *, msg, cell=None):
+    def add_error(self, *, msg, cells={}):
         self.errors.add(msg)
-        if cell:
+        for cell in cells:
             self.invalid_cells.add(cell)
+
+    def remove_candidates(self, *, group, values):
+        for c in group:
+            if self.candidates_.get(c):
+                self.candidates_[c] -= values
 
     def add_to_grid(self, *, cell, value):
         '''update the grid with the given cell & value, also removes this value
         from the list of candidates for all it's neighbours'''
         self.grid[cell] = value
         del self.candidates_[cell]
-        for n in all_neighbours(cell=cell):
-            if n in self.candidates_ and value in self.candidates_[n]:
-                self.candidates_[n].remove(value)
+        to_update = self.unsolved_in_group(group=all_neighbours(cell=cell))
+        self.remove_candidates(group=to_update, values={value})
 
     def values_in_group(self, *, group):
         '''takes an iterator of cell references and returns the unique values
@@ -146,7 +165,29 @@ class Game:
     def values_not_in_group(self, *, group):
         return set(ALL_VALUES - self.values_in_group(group=group))
 
+    def solved_cell(self, *, cell):
+        '''return True if cell is solved (or provided) False otherwise'''
+        if self.grid.get(cell) in ALL_VALUES:
+            return True
+        else:
+            return False
+
+    def solved_in_group(self, *, group):
+        '''take a group of cells and return only those which are solved'''
+        return {c for c in group if self.solved_cell(cell=c)}
+
+    def unsolved_in_group(self, *, group):
+        '''take a group of cells and return only those which are unsolved'''
+        return {c for c in group if not self.solved_cell(cell=c)}
+
+    def unsolved_common_neighbours(self, *, cells):
+        return self.unsolved_in_group(group=common_neighbours(cells=cells,
+                                                              inc=False))
+
     # solvers
+    # @staticmethod
+    # def all_solvers():
+    #     return ALL_SOLVERS
 
     def find_naked_singles(self):
         naked_singles = []
@@ -154,6 +195,7 @@ class Game:
             if len(values) == 1:
                 val, = values
                 naked_singles.append((cell, val))
+        # TODO: logging
         return naked_singles
 
     def find_hidden_singles(self):
@@ -173,5 +215,25 @@ class Game:
                     elif hidden_singles[cell] != val:
                         hidden_singles[cell] = ''
                         msg = 'Conflicting hidden single at %s' % cell
-                        self.add_error(msg=msg, cell=cell)
+                        self.add_error(msg=msg, cells={cell})
+        # TODO: logging
         return hidden_singles.items()
+
+    def find_naked_pairs(self):
+        cells_with_two_candidates = {c: v for c, v in self.candidates_.items()
+                                     if len(v) == 2}
+
+        for c, v in cells_with_two_candidates.items():
+            paired_with_c = {n for n in cells_with_two_candidates
+                             if n in all_neighbours(cell=c, inc=False)
+                             if self.unsolved_common_neighbours(cells=[n, c])
+                             if self.candidates_.get(n) == v}
+            for n in paired_with_c:
+                common = self.unsolved_common_neighbours(cells=[n, c])
+                self.remove_candidates(group=common, values=v)
+
+        # TODO: make it easier to call simple methods
+        for method in [self.find_naked_singles,
+                       self.find_hidden_singles]:
+            if entries := method():
+                return entries

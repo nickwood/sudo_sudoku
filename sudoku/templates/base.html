@@ -10,12 +10,12 @@
     <div id="navbar">
         <ul>
             <li><p>Sudo&nbsp;Sudoku</p></li>
-            <li><a href="/solve">Solve</a></li>
-            <li><a href="/generate">Generate</a></li>
-            <li><a href="/analyse">Analyse</a></li>
+            <!-- <li><a href="/solve">Solve</a></li> -->
+            <!-- <li><a href="/generate">Generate</a></li> -->
+            <!-- <li><a href="/analyse">Analyse</a></li> -->
         </ul>
     </div>
-    {% if grid is not defined %}
+    {% if grid is not defined or grid is none%}
     {% set grid = {} %}
     {% endif %}
     {% if invalid is not defined or invalid is none %}
@@ -28,8 +28,9 @@
         {% endfor %}
     </div>
     {% endif %}
-    <div id="content">
     <form id="interface" action="/solve" method="post">
+    <!-- {{ grid }} -->
+    <div id="content">
         <div id="game">
             <table id="grid" style="border-collapse: collapse;">
             {% for row in '123456789' %}
@@ -47,13 +48,28 @@
             {% endfor %}
             </table>
         </div>
-        <div id="controls">
-            {% block controls %}{% endblock %}
-            <button type="submit">solve</button>
-            <!-- <button type="submit" formaction="analyse">analyse</button> -->
+        <div id="advanced">
+            <h2>Allowed Solvers</h2>
+            <label class="container">
+                {% for k, v in params.items() %}
+                <input type="checkbox"
+                id="{{ k }}"
+                name="{{ k }}"
+                {{ "checked" if v is true or v == "True" }}
+                value="True">
+                <input type="hidden" value="False" name="{{ k }}">
+                <label for="{{ k }}">{{ k }}</label><br>
+                {% endfor %}
         </div>
-    </form>
+        <div class="break"></div>
+        <div id="controls">
+            {% for action in ['step', 'solve', 'clear', 'generate'] %}
+            <button type="submit" formaction="{{action}}">{{action}}</button>
+            {% endfor %}
+        </div>
     </div>
+    </form>
+    <!-- </div> -->
     <div id="footer">
         {% block footer %}
         This work is licensed under the terms of the <a href="https://opensource.org/licenses/MIT">MIT license</a><br>

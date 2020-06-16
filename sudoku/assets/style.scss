@@ -5,6 +5,10 @@ $light-grey: #dddddd;
 $primary: #ff7a4e;
 $secondary: #4e7aff;
 $highlight: #ffc74e;
+$l-font-size: 30px;
+$m-font-size: 18px;
+$s-font-size: 12px;
+$std-margin: 20px;
 
 body {
     color: $dark-grey;
@@ -36,7 +40,7 @@ body {
     p {
         color: $background;
         background-color: $primary;
-        font-size: 30px;
+        font-size: $l-font-size;
         line-height: 46px;
         margin: 0;
         padding-left: 20px;
@@ -69,24 +73,59 @@ body {
     p {
         color: $dark-grey;
         height: 30px;
+        font-size: $m-font-size;
         line-height: 30px;
         margin: 0;
         padding-left: 20px;
     }
 }
 
-#interface {
+#content {
+    width: 100%;
     display: flex;
     flex-direction: row;
-    flex-wrap: nowrap;
-    height: 600px;
-    width: 100%;
+    flex-wrap: wrap;
+
+    .break {
+        flex-basis: 100%;
+        height: 0;
+    }
+}
+
+#controls {
+    margin-bottom: 0;
+    margin-left: $std-margin;
+    margin-right: 0;
+    margin-top: $std-margin;
+
+    button {
+        background-color: $primary;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        // display: inline-block;
+        float: left;
+        font-size: $m-font-size;
+        line-height: 40px;
+        margin-left: 0;
+        margin-right: 8px;
+        margin-bottom: $std-margin;
+        text-align: center;
+        text-decoration: none;
+        width: 93px;
+      }
+}
+
+#advanced {
+    margin-bottom: 0;
+    margin-left: $std-margin;
+    margin-right: 0;
+    margin-top: $std-margin;
+    width: 200px;
 }
 
 #game {
     background-color: $background;
-    height: auto;
-    width: auto;
 }
 
 #grid {
@@ -94,8 +133,11 @@ body {
     border-collapse: collapse;
     border-spacing: 0;
     height: 395px;
-    margin: 20px;
-    width: 378px;
+    margin-bottom: 0;
+    margin-left: $std-margin;
+    margin-right: 0;
+    margin-top: $std-margin;
+    // width: 378px;
     
     td {
         border: 1px solid $light-grey;
@@ -105,8 +147,8 @@ body {
         border: 0;
         color: $dark-grey;
         display: inline-block;
+        font-size: $l-font-size;
         height: 40px;
-        font-size: 30px;
         margin: 0;
         padding: 0;
         text-align: center;
@@ -133,8 +175,9 @@ body {
 #footer {
     background-color: $light-grey;
     color: $dark-grey;
-    height: 60px;
-    line-height: 30px;
+    font-size: $s-font-size;
+    line-height: 24px;
     padding-left: 20px;
     width: 100%;
 }
+

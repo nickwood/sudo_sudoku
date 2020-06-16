@@ -11,4 +11,4 @@ jobs:
       - run: pipenv install --dev
       - run: pipenv run pytest
       - store_test_results:
-          path: /home/circleci/sudoku/test_results/out_report.xml
+          path: /home/circleci/sudoku/test_results/junit.xml

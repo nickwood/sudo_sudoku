@@ -3,10 +3,13 @@ orbs:
   heroku: circleci/heroku@1.0.1
 
 workflows:
+version: 1
   build_and_deploy:
     jobs:
       - build
-      - deploy
+      - deploy:
+          requires:
+            - build
 
 jobs:
   build:

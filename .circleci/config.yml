@@ -13,6 +13,10 @@ jobs:
       - run: pipenv run flake8 > build_artifacts/flake8.txt
       - run: pipenv run radon cc sudoku -a > build_artifacts/radon.txt
       - run: pipenv run pytest
+
+      - store_test_results:
+          path: build_artifacts/test_results
+
       - store_artifacts:
           path: /home/circleci/sudoku/build_artifacts/
           destination: build_artifacts

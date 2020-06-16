@@ -14,6 +14,7 @@ rope = "*"
 [packages]
 flask = "*"
 flask-scss = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.8"

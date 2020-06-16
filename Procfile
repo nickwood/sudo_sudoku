@@ -1,0 +1,1 @@
+web: gunicorn "sudoku:create_app()"

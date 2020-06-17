@@ -29,36 +29,34 @@
     </div>
     {% endif %}
     <form id="interface" action="/solve" method="post">
-    <!-- {{ grid }} -->
     <div id="content">
-        <div id="game">
-            <table id="grid" style="border-collapse: collapse;">
-            {% for row in '123456789' %}
-            <tr class="row">
-                {% for col in 'ABCDEFGHJ' %}
-                    {% set cell = col + row|string %}
-                    <td class="cell">
-                        <input class="{{ 'invalid' if cell in invalid }}" 
-                        type="text" name="{{ cell }}" 
-                        value="{{ grid.get(cell, '') }}" 
-                        maxlength="1">
-                    </td>
-                {% endfor %}
-                </tr>
+        <table id="grid" style="border-collapse: collapse;">
+        {% for row in '123456789' %}
+        <tr class="row">
+            {% for col in 'ABCDEFGHJ' %}
+                {% set cell = col + row|string %}
+                <td class="cell">
+                    <input class="{{ 'invalid' if cell in invalid }}" 
+                    type="text" name="{{ cell }}" 
+                    value="{{ grid.get(cell, '') }}" 
+                    maxlength="1">
+                </td>
             {% endfor %}
-            </table>
-        </div>
+            </tr>
+        {% endfor %}
+        </table>
         <div id="advanced">
             <h2>Allowed Solvers</h2>
-            <label class="container">
-                {% for k, v in params.items() %}
+            {% for k, v in params.items() %}
+                <label class="container">{{ k }}
                 <input type="checkbox"
                 id="{{ k }}"
                 name="{{ k }}"
                 {{ "checked" if v is true or v == "True" }}
                 value="True">
                 <input type="hidden" value="False" name="{{ k }}">
-                <label for="{{ k }}">{{ k }}</label><br>
+                <span class="checkmark"></span>
+                </label><br>
                 {% endfor %}
         </div>
         <div class="break"></div>

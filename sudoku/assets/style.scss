@@ -9,18 +9,23 @@ $l-font-size: 30px;
 $m-font-size: 18px;
 $s-font-size: 12px;
 $std-margin: 20px;
+$min-grid-size: 300px;
+$max-grid-size: 600px;
+$thin-border: 1px;
+$thick-border: 3px;
 
 body {
     color: $dark-grey;
     font-family: $fonts;
-    margin: 0;
-    padding: 0;
+    // margin: 0;
+    // padding: 0;
 }
 
 #navbar {
     background-color: $light-grey;
     height: 50px;
-    width: 100%;
+    // display: none;
+    // width: 100%;
 
     ul {
         background-color: $dark-grey;
@@ -69,6 +74,7 @@ body {
 #messages {
     background-color: $highlight;
     width: 100%;
+    // display: none;
 
     p {
         color: $dark-grey;
@@ -92,84 +98,167 @@ body {
     }
 }
 
-#controls {
-    margin-bottom: 0;
-    margin-left: $std-margin;
-    margin-right: 0;
-    margin-top: $std-margin;
-
-    button {
-        background-color: $primary;
-        border: none;
-        border-radius: 6px;
-        color: white;
-        // display: inline-block;
-        float: left;
-        font-size: $m-font-size;
-        line-height: 40px;
-        margin-left: 0;
-        margin-right: 8px;
-        margin-bottom: $std-margin;
-        text-align: center;
-        text-decoration: none;
-        width: 93px;
-      }
-}
-
-#advanced {
-    margin-bottom: 0;
-    margin-left: $std-margin;
-    margin-right: 0;
-    margin-top: $std-margin;
-    width: 200px;
-}
-
-#game {
-    background-color: $background;
-}
-
 #grid {
-    border: 0;
-    border-collapse: collapse;
-    border-spacing: 0;
-    height: 395px;
-    margin-bottom: 0;
-    margin-left: $std-margin;
-    margin-right: 0;
-    margin-top: $std-margin;
-    // width: 378px;
+    max-width: $max-grid-size;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    margin: $std-margin;
+
+    &:before {
+        content: "";
+        display: block;
+        padding-top: 100%;
+    }
+
+    tbody {
+        bottom: 0;
+        display: flex;
+        flex-wrap: nowrap;
+        flex-direction: column;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+    }
+
+    tr {
+        border: 0;
+        display: flex;
+        padding: 0;
+        flex-wrap: nowrap;
+        flex-grow: 1;
+    }
     
     td {
-        border: 1px solid $light-grey;
+        border-bottom: $thin-border solid $light-grey;
+        border-left: $thin-border solid $light-grey;
+        flex-grow: 1;
     }
     
     .cell input {
         border: 0;
         color: $dark-grey;
-        display: inline-block;
         font-size: $l-font-size;
-        height: 40px;
+        height: 100%;
         margin: 0;
         padding: 0;
         text-align: center;
-        width: 40px;
+        width: 100%;
     }
 
     .invalid {
         background-color: $highlight;
     }
     td:first-child {
-        border-left: 3px solid $dark-grey;
+        border-left: $thick-border solid $dark-grey;
     }
     td:nth-child(3n) {
-        border-right: 3px solid $dark-grey;
+        border-right: $thick-border solid $dark-grey;
     }
     tr:first-child {
-        border-top: 3px solid $dark-grey;
+        border-top: $thick-border solid $dark-grey;
     }
     tr:nth-child(3n) {
-        border-bottom: 3px solid $dark-grey;
+        border-bottom: $thick-border solid $dark-grey;
     }
+}
+
+#advanced {
+    margin: $std-margin;
+    width: 30%;
+    min-width: 300px;
+
+    h2 {
+        margin: 0;
+        margin-bottom: $std-margin;
+    }
+
+    .container {
+        display: block;
+        position: relative;
+        padding-left: 35px;
+        padding-bottom: 0;
+        cursor: pointer;
+        line-height: 25px;
+        font-size: $m-font-size;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    .container input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+    }
+
+    .checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 25px;
+        width: 25px;
+        background-color: $background;
+    }
+
+    .container:hover input ~ .checkmark {
+        background-color: $dark-grey;
+    }
+
+    .container input:checked ~ .checkmark {
+        background-color: $secondary;
+    }
+
+    .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+    }
+
+    .container input:checked ~ .checkmark:after {
+        display: block;
+    }
+
+    .container .checkmark:after {
+        left: 9px;
+        top: 5px;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 3px 3px 0;
+        -webkit-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+        transform: rotate(45deg);
+    }
+}
+
+#controls {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    height: 70px;
+    margin: $std-margin;
+    max-width: $max-grid-size;
+    width: 100%;
+    
+    button {
+        background-color: $primary;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-size: $m-font-size;
+        flex-grow: 1;
+        line-height: 40px;
+        margin: 4px;
+        margin-bottom: $std-margin;
+        text-align: center;
+        text-decoration: none;
+      }
 }
 
 #footer {

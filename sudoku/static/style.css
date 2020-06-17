@@ -1,13 +1,10 @@
 body {
   color: #666;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  margin: 0;
-  padding: 0; }
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
 
   #navbar {
     background-color: #dddddd;
-    height: 50px;
-    width: 100%; }
+    height: 50px; }
     #navbar ul {
       background-color: #666;
       display: flex;
@@ -62,67 +59,130 @@ body {
     flex-basis: 100%;
     height: 0; }
 
+#grid {
+  max-width: 600px;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  margin: 20px; }
+  #grid:before {
+    content: "";
+    display: block;
+    padding-top: 100%; }
+    #grid tbody {
+      bottom: 0;
+      display: flex;
+      flex-wrap: nowrap;
+      flex-direction: column;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0; }
+      #grid tr {
+        border: 0;
+        display: flex;
+        padding: 0;
+        flex-wrap: nowrap;
+        flex-grow: 1; }
+        #grid td {
+          border-bottom: 1px solid #dddddd;
+          border-left: 1px solid #dddddd;
+          flex-grow: 1; }
+          #grid .cell input {
+            border: 0;
+            color: #666;
+            font-size: 30px;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            width: 100%; }
+            #grid .invalid {
+              background-color: #ffc74e; }
+              #grid td:first-child {
+                border-left: 3px solid #666; }
+                #grid td:nth-child(3n) {
+                  border-right: 3px solid #666; }
+                  #grid tr:first-child {
+                    border-top: 3px solid #666; }
+                    #grid tr:nth-child(3n) {
+                      border-bottom: 3px solid #666; }
+
+#advanced {
+  margin: 20px;
+  width: 30%;
+  min-width: 300px; }
+  #advanced h2 {
+    margin: 0;
+    margin-bottom: 20px; }
+    #advanced .container {
+      display: block;
+      position: relative;
+      padding-left: 35px;
+      padding-bottom: 0;
+      cursor: pointer;
+      line-height: 25px;
+      font-size: 18px;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none; }
+      #advanced .container input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0; }
+        #advanced .checkmark {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 25px;
+          width: 25px;
+          background-color: white; }
+          #advanced .container:hover input ~ .checkmark {
+            background-color: #666; }
+            #advanced .container input:checked ~ .checkmark {
+              background-color: #4e7aff; }
+              #advanced .checkmark:after {
+                content: "";
+                position: absolute;
+                display: none; }
+                #advanced .container input:checked ~ .checkmark:after {
+                  display: block; }
+                  #advanced .container .checkmark:after {
+                    left: 9px;
+                    top: 5px;
+                    width: 5px;
+                    height: 10px;
+                    border: solid white;
+                    border-width: 0 3px 3px 0;
+                    -webkit-transform: rotate(45deg);
+                    -ms-transform: rotate(45deg);
+                    transform: rotate(45deg); }
+
 #controls {
-  margin-bottom: 0;
-  margin-left: 20px;
-  margin-right: 0;
-  margin-top: 20px; }
+  margin: 20px;
+  max-width: 600px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  height: 70px;
+  width: 100%;
+  padding-left: -4px; }
   #controls button {
+    flex-grow: 1;
     background-color: #ff7a4e;
     border: none;
     border-radius: 6px;
     color: white;
-    float: left;
     font-size: 18px;
     line-height: 40px;
-    margin-left: 0;
-    margin-right: 8px;
+    margin: 4px;
     margin-bottom: 20px;
     text-align: center;
-    text-decoration: none;
-    width: 93px; }
-
-#advanced {
-  margin-bottom: 0;
-  margin-left: 20px;
-  margin-right: 0;
-  margin-top: 20px;
-  width: 200px; }
-
-  #game {
-    background-color: white; }
-
-    #grid {
-      border: 0;
-      border-collapse: collapse;
-      border-spacing: 0;
-      height: 395px;
-      margin-bottom: 0;
-      margin-left: 20px;
-      margin-right: 0;
-      margin-top: 20px; }
-      #grid td {
-        border: 1px solid #dddddd; }
-        #grid .cell input {
-          border: 0;
-          color: #666;
-          display: inline-block;
-          font-size: 30px;
-          height: 40px;
-          margin: 0;
-          padding: 0;
-          text-align: center;
-          width: 40px; }
-          #grid .invalid {
-            background-color: #ffc74e; }
-            #grid td:first-child {
-              border-left: 3px solid #666; }
-              #grid td:nth-child(3n) {
-                border-right: 3px solid #666; }
-                #grid tr:first-child {
-                  border-top: 3px solid #666; }
-                  #grid tr:nth-child(3n) {
-                    border-bottom: 3px solid #666; }
+    text-decoration: none; }
 
 #footer {
   background-color: #dddddd;

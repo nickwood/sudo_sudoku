@@ -57,7 +57,7 @@ demo_hard = {'C3': '7', 'E5': '2', 'A4': '7', 'A2': '2', 'G4': '2', 'J4': '9',
              'C1': '9', 'A6': '9', 'D2': '7', 'G1': '4'}
 
 
-def render_defaults(*, grid=demo_hard, params=DEFAULT_PARAMS, errors=None,
+def render_defaults(*, grid=demo_mid, params=DEFAULT_PARAMS, errors=None,
                     invalid=None):
     return render_template('base.html',
                            grid=grid,

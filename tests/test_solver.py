@@ -32,14 +32,14 @@ def test_grid_iterator():
     assert grid == exp_grid
 
 
-row_a1 = {'A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'J1'}
-row_a4 = {'A4', 'B4', 'C4', 'D4', 'E4', 'F4', 'G4', 'H4', 'J4'}
-row_d3 = {'A3', 'B3', 'C3', 'D3', 'E3', 'F3', 'G3', 'H3', 'J3'}
-row_j7 = {'A7', 'B7', 'C7', 'D7', 'E7', 'F7', 'G7', 'H7', 'J7'}
-col_a1 = {'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9'}
-col_c4 = {'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9'}
-col_d3 = {'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9'}
-col_j7 = {'J1', 'J2', 'J3', 'J4', 'J5', 'J6', 'J7', 'J8', 'J9'}
+col_a1 = {'A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'J1'}
+col_a4 = {'A4', 'B4', 'C4', 'D4', 'E4', 'F4', 'G4', 'H4', 'J4'}
+col_d3 = {'A3', 'B3', 'C3', 'D3', 'E3', 'F3', 'G3', 'H3', 'J3'}
+col_j7 = {'A7', 'B7', 'C7', 'D7', 'E7', 'F7', 'G7', 'H7', 'J7'}
+row_a1 = {'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9'}
+row_c4 = {'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9'}
+row_d3 = {'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9'}
+row_j7 = {'J1', 'J2', 'J3', 'J4', 'J5', 'J6', 'J7', 'J8', 'J9'}
 box_a1 = {'A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3'}
 box_d3 = {'D1', 'D2', 'D3', 'E1', 'E2', 'E3', 'F1', 'F2', 'F3'}
 box_f7 = {'D7', 'D8', 'D9', 'E7', 'E8', 'E9', 'F7', 'F8', 'F9'}
@@ -55,7 +55,7 @@ all_j7 = {'A7', 'B7', 'C7', 'D7', 'E7', 'F7', 'G7', 'G8', 'G9', 'H7', 'H8',
 def test_group_iterator():
     assert isinstance(solver.group_iterator(), Iterable)
     groups = [c for c in solver.group_iterator()]
-    for g in [row_a1, row_a4, row_d3, row_j7, col_a1, col_c4, col_d3, col_j7,
+    for g in [row_a1, row_c4, row_d3, row_j7, col_a1, col_a4, col_d3, col_j7,
               box_a1, box_d3, box_f7, box_j7]:
         assert g in groups
     assert len(groups) == 27
@@ -98,8 +98,8 @@ def test_all_neighbours():
 
 
 def test_common_neighbours():
-    assert solver.common_neighbours(cells=['A1', 'A6']) == col_a1
-    assert solver.common_neighbours(cells=['A1', 'D1']) == row_a1
+    assert solver.common_neighbours(cells=['A1', 'A6']) == row_a1
+    assert solver.common_neighbours(cells=['A1', 'D1']) == col_a1
     assert solver.common_neighbours(cells=['D8', 'F7']) == box_f7
     T1 = {'D4', 'E4', 'F4', 'D5', 'E5', 'F5', 'D6', 'E6', 'F6', 'A4', 'B4',
           'C4', 'G4', 'H4', 'J4'}
@@ -108,8 +108,8 @@ def test_common_neighbours():
     assert solver.common_neighbours(cells=['C9', 'B8']) == T2
     assert solver.common_neighbours(cells=['A1', 'J7']) == {'J1', 'A7'}
 
-    assert solver.common_neighbours(cells=['A1', 'A6'], inc=False) == col_a1 - {'A1', 'A6'}  # noqa: E501
-    assert solver.common_neighbours(cells=['A1', 'D1'], inc=False) == row_a1 - {'A1', 'D1'}  # noqa: E501
+    assert solver.common_neighbours(cells=['A1', 'A6'], inc=False) == row_a1 - {'A1', 'A6'}  # noqa: E501
+    assert solver.common_neighbours(cells=['A1', 'D1'], inc=False) == col_a1 - {'A1', 'D1'}  # noqa: E501
     assert solver.common_neighbours(cells=['D8', 'F7'], inc=False) == box_f7 - {'F7', 'D8'}  # noqa: E501
     T3 = {'F4', 'D5', 'E5', 'F5', 'D6', 'E6', 'F6', 'A4', 'B4', 'C4', 'G4',
           'H4', 'J4'}
@@ -157,7 +157,7 @@ def test_add_error():
 
 def test_remove_candidates():
     with GameInstance() as game:
-        game.remove_candidates(group=col_a1, values={'2', '8', '7', '9'})
+        game.remove_candidates(group=row_a1, values={'2', '8', '7', '9'})
         assert game.candidates_['A3'] == {'1'}
         assert game.candidates_['A7'] == {'1', '3'}
         assert game.candidates_['A8'] == {'3'}
@@ -174,18 +174,18 @@ def test_add_to_grid():
 
 def test_values_in_group():
     with GameInstance() as game:
-        assert game.values_in_group(group=row_a1) == set(list('357'))
-        assert game.values_in_group(group=row_a4) == set(list('368'))
-        assert game.values_in_group(group=col_c4) == set(list('8'))
+        assert game.values_in_group(group=col_a1) == set(list('357'))
+        assert game.values_in_group(group=col_a4) == set(list('368'))
+        assert game.values_in_group(group=row_c4) == set(list('8'))
         assert game.values_in_group(group=box_f7) == set(list('1489'))
         assert game.values_in_group(group=all_j7) == set(list('12356789'))
 
 
 def test_values_not_in_group():
     with GameInstance() as game:
-        assert game.values_not_in_group(group=row_a1) == set(list('124689'))
-        assert game.values_not_in_group(group=row_a4) == set(list('124579'))
-        assert game.values_not_in_group(group=col_c4) == set(list('12345679'))
+        assert game.values_not_in_group(group=col_a1) == set(list('124689'))
+        assert game.values_not_in_group(group=col_a4) == set(list('124579'))
+        assert game.values_not_in_group(group=row_c4) == set(list('12345679'))
         assert game.values_not_in_group(group=box_f7) == set(list('23567'))
         assert game.values_not_in_group(group=all_j7) == set(list('4'))
 
@@ -205,8 +205,8 @@ def test_solved_cell():
 
 def test_solved_in_group():
     with GameInstance() as game:
-        assert game.solved_in_group(group=row_a1) == {'A1', 'B1', 'E1'}
-        assert game.solved_in_group(group=col_j7) == {'J4', 'J5', 'J6', 'J8', 'J9'}  # noqa: E501
+        assert game.solved_in_group(group=col_a1) == {'A1', 'B1', 'E1'}
+        assert game.solved_in_group(group=row_j7) == {'J4', 'J5', 'J6', 'J8', 'J9'}  # noqa: E501
         assert game.solved_in_group(group=box_f7) == {'D8', 'E8', 'E9', 'F8'}
 
         T1 = {'G7', 'H7', 'H9', 'B7', 'J4', 'J5', 'J6', 'J8', 'J9'}
@@ -218,7 +218,7 @@ def test_solved_in_group():
 
 def test_unsolved_in_group():
     with GameInstance() as game:
-        assert game.unsolved_in_group(group=col_j7) == {'J1', 'J2', 'J3', 'J7'}
+        assert game.unsolved_in_group(group=row_j7) == {'J1', 'J2', 'J3', 'J7'}
         assert game.unsolved_in_group(group=box_f7) == {'D7', 'E7', 'F7', 'D9', 'F9'}  # noqa: E501
 
         T1 = {'J3', 'J2', 'A7', 'C7', 'F7', 'J1', 'G9', 'G8', 'J7', 'H8', 'D7', 'E7'}  # noqa: E501

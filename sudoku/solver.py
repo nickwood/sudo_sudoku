@@ -2,11 +2,11 @@ from collections import defaultdict
 from functools import lru_cache
 
 
-ALL_COLS = frozenset('ABCDEFGHJ')
-ALL_ROWS = frozenset('123456789')
+ALL_ROWS = frozenset('ABCDEFGHJ')
+ALL_COLS = frozenset('123456789')
 ALL_VALUES = frozenset('123456789')
-COL_GROUPS = ['ABC', 'DEF', 'GHJ']
-ROW_GROUPS = ['123', '456', '789']
+ROW_GROUPS = ['ABC', 'DEF', 'GHJ']
+COL_GROUPS = ['123', '456', '789']
 
 
 def invalid(*, grid):
@@ -19,7 +19,7 @@ def invalid(*, grid):
 
 
 def grid_iterator():
-    return (col + row for row in ALL_ROWS for col in ALL_COLS)
+    return (row + col for row in ALL_ROWS for col in ALL_COLS)
 
 
 def group_iterator():
@@ -31,35 +31,36 @@ def group_iterator():
 
 @lru_cache(None)
 def cells_in_row(*, cell, inc=True):
-    _, row = cell
+    row, _ = cell
     if inc:
-        return frozenset(col + row for col in ALL_COLS)
+        return frozenset(row + col for col in ALL_COLS)
     else:
-        return frozenset(col + row for col in ALL_COLS) - {cell}
+        return frozenset(row + col for col in ALL_COLS) - {cell}
 
 
 @lru_cache(None)
 def cells_in_col(*, cell, inc=True):
-    col, _ = cell
+    _, col = cell
     if inc:
-        return frozenset(col + row for row in ALL_ROWS)
+        return frozenset(row + col for row in ALL_ROWS)
     else:
-        return frozenset(col + row for row in ALL_ROWS) - {cell}
+        return frozenset(row + col for row in ALL_ROWS) - {cell}
 
 
 @lru_cache(None)
 def cells_in_box(*, cell, inc=True):
+    row, col = cell
     for i in COL_GROUPS:
-        if cell[0] in i:
+        if col in i:
             col_group = i
             break
 
     for j in ROW_GROUPS:
-        if cell[1] in j:
+        if row in j:
             row_group = j
             break
 
-    box = frozenset(col + row for row in row_group for col in col_group)
+    box = frozenset(row + col for row in row_group for col in col_group)
     if inc:
         return box
     else:

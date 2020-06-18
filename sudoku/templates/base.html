@@ -10,9 +10,6 @@
     <div id="navbar">
         <ul>
             <li><p>Sudo&nbsp;Sudoku</p></li>
-            <!-- <li><a href="/solve">Solve</a></li> -->
-            <!-- <li><a href="/generate">Generate</a></li> -->
-            <!-- <li><a href="/analyse">Analyse</a></li> -->
         </ul>
     </div>
     {% if grid is not defined or grid is none%}
@@ -31,10 +28,10 @@
     <form id="interface" action="/solve" method="post">
     <div id="content">
         <table id="grid" style="border-collapse: collapse;">
-        {% for row in '123456789' %}
+        {% for row in 'ABCDEFGHJ' %}
         <tr class="row">
-            {% for col in 'ABCDEFGHJ' %}
-                {% set cell = col + row|string %}
+            {% for col in '123456789' %}
+                {% set cell = row + col|string %}
                 <td class="cell">
                     <input class="{{ 'invalid' if cell in invalid }}" 
                     type="text" name="{{ cell }}" 

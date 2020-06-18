@@ -1,4 +1,5 @@
 from collections import defaultdict
+from itertools import combinations
 from functools import lru_cache
 
 
@@ -93,7 +94,9 @@ class Game:
     def init_solvers(self, *, params):
         methods = {'find_naked_singles': self.find_naked_singles,
                    'find_hidden_singles': self.find_hidden_singles,
-                   'find_naked_pairs': self.find_naked_pairs}
+                   'find_naked_pairs': self.find_naked_pairs,
+                   'find_naked_triples': self.find_naked_triples,
+                   'find_naked_quads': self.find_naked_quads}
         return [m for k, m in methods.items()
                 if params.get(k) is True or params.get(k) == 'True']
 
@@ -131,10 +134,19 @@ class Game:
         if self.candidates_ is None:
             self.initialise_candidates()
         for method in self.solvers:
-            if entries := method():
-                for (c, v) in entries:
-                    self.add_to_grid(cell=c, value=v)
-                break
+            if modified := method():
+                if modified is True:
+                    # TODO: make it easier to call simple methods
+                    modified = False
+                    for method in [self.find_naked_singles,
+                                   self.find_hidden_singles]:
+                        if entries := method():
+                            modified = entries
+                            break
+                if modified:
+                    for (c, v) in modified:
+                        self.add_to_grid(cell=c, value=v)
+                    break
         for cell, candidates in self.candidates_.items():
             if candidates == set():
                 msg = 'No remaining candidates for %s' % cell
@@ -166,6 +178,9 @@ class Game:
     def values_not_in_group(self, *, group):
         return set(ALL_VALUES - self.values_in_group(group=group))
 
+    def candidates_in_group(self, *, group):
+        return set.union(*[self.candidates_.get(c, set()) for c in group])
+
     def solved_cell(self, *, cell):
         '''return True if cell is solved (or provided) False otherwise'''
         if self.grid.get(cell) in ALL_VALUES:
@@ -184,11 +199,6 @@ class Game:
     def unsolved_common_neighbours(self, *, cells):
         return self.unsolved_in_group(group=common_neighbours(cells=cells,
                                                               inc=False))
-
-    # solvers
-    # @staticmethod
-    # def all_solvers():
-    #     return ALL_SOLVERS
 
     def find_naked_singles(self):
         naked_singles = []
@@ -220,21 +230,24 @@ class Game:
         # TODO: logging
         return hidden_singles.items()
 
+    def find_naked_x(self, x):
+        found = False
+        for group in group_iterator():
+            unsolved = self.unsolved_in_group(group=group)
+            if len(unsolved) <= x:
+                continue
+            for x_set in combinations(unsolved, x):
+                if len(cands := self.candidates_in_group(group=x_set)) == x:
+                    neighbours = group - set(x_set)
+                    self.remove_candidates(group=neighbours, values=cands)
+                    found = True
+        return found
+
     def find_naked_pairs(self):
-        cells_with_two_candidates = {c: v for c, v in self.candidates_.items()
-                                     if len(v) == 2}
+        return self.find_naked_x(2)
 
-        for c, v in cells_with_two_candidates.items():
-            paired_with_c = {n for n in cells_with_two_candidates
-                             if n in all_neighbours(cell=c, inc=False)
-                             if self.unsolved_common_neighbours(cells=[n, c])
-                             if self.candidates_.get(n) == v}
-            for n in paired_with_c:
-                common = self.unsolved_common_neighbours(cells=[n, c])
-                self.remove_candidates(group=common, values=v)
+    def find_naked_triples(self):
+        return self.find_naked_x(3)
 
-        # TODO: make it easier to call simple methods
-        for method in [self.find_naked_singles,
-                       self.find_hidden_singles]:
-            if entries := method():
-                return entries
+    def find_naked_quads(self):
+        return self.find_naked_x(4)

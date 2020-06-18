@@ -190,6 +190,14 @@ def test_values_not_in_group():
         assert game.values_not_in_group(group=all_j7) == set(list('4'))
 
 
+def test_candidates_in_group():
+    with GameInstance() as game:
+        assert game.candidates_in_group(group=col_a1) == set(list('124689'))
+        assert game.candidates_in_group(group=box_f7) == set(list('23567'))
+        assert game.candidates_in_group(group=['H2', 'H4']) == set(list('23459'))  # noqa: E501
+        assert game.candidates_in_group(group=['J1', 'J2', 'J3']) == set(list('2478'))  # noqa: E501
+
+
 def test_solved_cell():
     with GameInstance() as game:
         assert game.solved_cell(cell='A1')
@@ -270,8 +278,86 @@ GRID_NAKED_PAIR = {'H7': '6', 'D3': '2', 'B3': '1', 'C6': '1', 'B6': '9',
 
 
 def test_naked_pairs():
+    # TODO: test_unhappy_path
     with GameInstance(grid=GRID_NAKED_PAIR) as game:
-        assert game.find_naked_pairs() == [('A3', '8')]
-        for c in ['A3', 'B9', 'C8']:
-            assert '2' not in game.candidates_[c]
-            assert '9' not in game.candidates_[c]
+        assert game.candidates_['A3'] == set(list('89'))
+        assert game.candidates_['A4'] == set(list('24578'))
+        assert game.candidates_['A5'] == set(list('2458'))
+        assert game.candidates_['A6'] == set(list('78'))
+        assert game.candidates_['A8'] == set(list('29'))
+        assert game.candidates_['A9'] == set(list('29'))
+        assert game.candidates_['B9'] == set(list('236'))
+        assert game.candidates_['C8'] == set(list('2369'))
+        assert game.find_naked_pairs() is True
+        assert game.candidates_['A3'] == set(list('8'))
+        assert game.candidates_['A4'] == set(list('4578'))
+        assert game.candidates_['A5'] == set(list('458'))
+        assert game.candidates_['A6'] == set(list('78'))
+        assert game.candidates_['A8'] == set(list('29'))
+        assert game.candidates_['A9'] == set(list('29'))
+        assert game.candidates_['B9'] == set(list('36'))
+        assert game.candidates_['C8'] == set(list('36'))
+
+
+GRID_NAKED_TRIPLE = {'C3': '7', 'E5': '2', 'A4': '7', 'A2': '2', 'G4': '2',
+                     'J4': '9', 'F6': '7', 'E6': '5', 'G2': '8', 'J7': '6',
+                     'B6': '2', 'H5': '5', 'H7': '9', 'F2': '9', 'F5': '4',
+                     'J6': '1', 'F8': '6', 'D8': '1', 'F4': '1', 'J9': '4',
+                     'B3': '8', 'E4': '6', 'B4': '5', 'D6': '3', 'J5': '8',
+                     'J8': '7', 'H6': '4', 'G8': '3', 'A5': '6', 'G6': '6',
+                     'C9': '6', 'C4': '4', 'H1': '7', 'D5': '9', 'G7': '5',
+                     'D4': '8', 'G9': '1', 'G5': '7', 'H4': '3', 'A1': '3',
+                     'G3': '9', 'C6': '8', 'C1': '9', 'A6': '9', 'D2': '7',
+                     'G1': '4'}
+
+
+def test_naked_triples():
+    # TODO: test_unhappy_path
+    with GameInstance(grid=GRID_NAKED_TRIPLE) as game:
+        assert game.candidates_['H2'] == set(list('16'))
+        assert game.candidates_['H3'] == set(list('126'))
+        assert game.candidates_['J1'] == set(list('25'))
+        assert game.candidates_['J2'] == set(list('35'))
+        assert game.candidates_['J3'] == set(list('235'))
+        assert game.candidates_['A9'] == set(list('58'))
+        assert game.candidates_['B9'] == set(list('379'))
+        assert game.candidates_['D9'] == set(list('25'))
+        assert game.candidates_['E9'] == set(list('3789'))
+        assert game.candidates_['F9'] == set(list('2358'))
+        assert game.candidates_['H9'] == set(list('28'))
+        assert game.find_naked_triples() is True
+        assert game.candidates_['H2'] == set(list('16'))
+        assert game.candidates_['H3'] == set(list('16'))
+        assert game.candidates_['J1'] == set(list('25'))
+        assert game.candidates_['J2'] == set(list('35'))
+        assert game.candidates_['J3'] == set(list('235'))
+        assert game.candidates_['A9'] == set(list('58'))
+        assert game.candidates_['B9'] == set(list('379'))
+        assert game.candidates_['D9'] == set(list('25'))
+        assert game.candidates_['E9'] == set(list('379'))
+        assert game.candidates_['F9'] == set(list('3'))
+        assert game.candidates_['H9'] == set(list('28'))
+
+
+GRID_NAKED_QUAD = {'A5': '6', 'E5': '2', 'A2': '2', 'C4': '4', 'F6': '7',
+                   'J6': '1', 'A1': '3', 'J4': '9', 'G1': '4', 'G2': '8',
+                   'D2': '7', 'G7': '5', 'C6': '8', 'C3': '7', 'G5': '7',
+                   'J7': '6', 'A4': '7', 'D4': '8', 'G4': '2', 'H5': '5',
+                   'C9': '6', 'J8': '7', 'F5': '4', 'F2': '9', 'J9': '4',
+                   'J5': '8', 'B4': '5', 'D6': '3', 'G8': '3', 'D8': '1',
+                   'G3': '9', 'C1': '9', 'H1': '7', 'G6': '6', 'G9': '1',
+                   'H6': '4', 'A6': '9', 'B6': '2', 'B3': '8', 'E4': '6',
+                   'F8': '6', 'D5': '9', 'H7': '9', 'E6': '5', 'H4': '3',
+                   'F4': '1'}
+
+
+def test_naked_quads():
+    # TODO: test_unhappy_path
+    with GameInstance(grid=GRID_NAKED_QUAD) as game:
+        assert game.find_naked_quads() is True
+        assert game.candidates_['A9'] == set(list('58'))
+        assert game.candidates_['B9'] == set(list('79'))
+        assert game.candidates_['D9'] == set(list('25'))
+        assert game.candidates_['E9'] == set(list('79'))
+        assert game.candidates_['F9'] == set(list('2358'))
+        assert game.candidates_['H9'] == set(list('28'))

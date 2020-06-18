@@ -5,7 +5,9 @@ from .solver import invalid, Game, grid_iterator
 
 DEFAULT_PARAMS = {'find_naked_singles': True,
                   'find_hidden_singles': True,
-                  'find_naked_pairs': True}
+                  'find_naked_pairs': True,
+                  'find_naked_triples': True,
+                  'find_naked_quads': True}
 
 
 def split_post(*, post_data):
@@ -45,9 +47,17 @@ demo_mid = {'H7': '6', 'D3': '2', 'B3': '1', 'C6': '1', 'B6': '9',
             'D2': '3', 'C7': '5', 'E2': '1', 'J5': '9', 'H6': '4',
             'D7': '8', 'G3': '5', 'F6': '3', 'H3': '3', 'A2': '6',
             'A7': '1'}
+demo_hard = {'C3': '7', 'E5': '2', 'A4': '7', 'A2': '2', 'G4': '2', 'J4': '9',
+             'F6': '7', 'E6': '5', 'G2': '8', 'J7': '6', 'B6': '2', 'H5': '5',
+             'H7': '9', 'F2': '9', 'F5': '4', 'J6': '1', 'F8': '6', 'D8': '1',
+             'F4': '1', 'J9': '4', 'B3': '8', 'E4': '6', 'B4': '5', 'D6': '3',
+             'J5': '8', 'J8': '7', 'H6': '4', 'G8': '3', 'A5': '6', 'G6': '6',
+             'C9': '6', 'C4': '4', 'H1': '7', 'D5': '9', 'G7': '5', 'D4': '8',
+             'G9': '1', 'G5': '7', 'H4': '3', 'A1': '3', 'G3': '9', 'C6': '8',
+             'C1': '9', 'A6': '9', 'D2': '7', 'G1': '4'}
 
 
-def render_defaults(*, grid=demo_mid, params=DEFAULT_PARAMS, errors=None,
+def render_defaults(*, grid=demo_hard, params=DEFAULT_PARAMS, errors=None,
                     invalid=None):
     return render_template('base.html',
                            grid=grid,

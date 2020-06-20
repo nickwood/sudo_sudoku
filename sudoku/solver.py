@@ -231,17 +231,22 @@ class Game:
         return hidden_singles.items()
 
     def find_naked_x(self, x):
-        found = False
+        naked_x = set()
         for group in group_iterator():
             unsolved = self.unsolved_in_group(group=group)
             if len(unsolved) <= x:
                 continue
             for x_set in combinations(unsolved, x):
-                if len(cands := self.candidates_in_group(group=x_set)) == x:
-                    neighbours = group - set(x_set)
-                    self.remove_candidates(group=neighbours, values=cands)
-                    found = True
-        return found
+                cands = frozenset(self.candidates_in_group(group=x_set))
+                if len(cands) == x:
+                    naked_x.add((frozenset(x_set), cands))
+        if naked_x:
+            for cells, values in naked_x:
+                neighbours = self.unsolved_common_neighbours(cells=cells)
+                self.remove_candidates(group=neighbours, values=values)
+            return True
+        else:
+            return False
 
     def find_naked_pairs(self):
         return self.find_naked_x(2)

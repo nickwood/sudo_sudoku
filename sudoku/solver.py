@@ -111,12 +111,12 @@ class Game:
                 if params.get(k) is True or params.get(k) == 'True']
 
     def solve(self):
-        old_state = None
-        while old_state != self.grid:
-            old_state = self.grid.copy()
-            self.solve_step()
+        changed = True
+        while changed:
+            changed = self.solve_step()
             if self.errors:
                 return False
+
         if self.is_solved():
             return True
         else:
@@ -132,19 +132,10 @@ class Game:
     def solve_step(self):
         # print({k: v for k, v in self.grid.items() if v != ''})
         for method in self.solvers:
-            if modified := method():
-                if modified is True:
-                    # TODO: make it easier to call simple methods
-                    modified = False
-                    for method in [self.find_naked_singles,
-                                   self.find_hidden_singles]:
-                        if entries := method():
-                            modified = entries
-                            break
-                if modified:
-                    for (c, v) in modified:
-                        self.add_to_grid(cell=c, value=v)
-                    break
+            if method() is True:
+                return True
+
+        # TODO: move to standalone method
         for cell, candidates in self.candidates_.items():
             if candidates == set():
                 msg = 'No remaining candidates for %s' % cell
@@ -198,35 +189,32 @@ class Game:
         return self.unsolved_in_group(group=common_neighbours(cells=cells,
                                                               inc=False))
 
+    def cells_with_candidate(self, *, group, value):
+        '''return a set containing the cells in group which have 'value' as a
+        candidate'''
+        return {c for c in group if value in self.candidates_.get(c, set())}
+
+    def cells_with_candidates(self, *, group, values):
+        '''return a set containing the cells in group which any of 'values' in
+        their candidates'''
+        cells = set()
+        for v in values:
+            cells |= self.cells_with_candidate(group=group, value=v)
+        return cells
+
     def find_naked_singles(self):
-        naked_singles = []
+        found = set()
         for cell, values in self.candidates_.items():
             if len(values) == 1:
                 val, = values
-                naked_singles.append((cell, val))
-        # TODO: logging
-        return naked_singles
+                found.add((cell, next(iter(values))))
 
-    def find_hidden_singles(self):
-        hidden_singles = {}
-
-        for group in group_iterator():
-            hidden_candidates = defaultdict(set)
-            for c in (group & self.candidates_.keys()):
-                for v in self.candidates_[c]:
-                    hidden_candidates[v].add(c)
-
-            for val, cells in hidden_candidates.items():
-                if len(cells) == 1:
-                    cell, = cells
-                    if cell not in hidden_singles:
-                        hidden_singles[cell] = val
-                    elif hidden_singles[cell] != val:
-                        hidden_singles[cell] = ''
-                        msg = 'Conflicting hidden single at %s' % cell
-                        self.add_error(msg=msg, cells={cell})
-        # TODO: logging
-        return hidden_singles.items()
+        if found:
+            for (c, v) in found:
+                self.add_to_grid(cell=c, value=v)
+            return True
+        else:
+            return False
 
     def find_naked_x(self, x):
         naked_x = set()
@@ -240,9 +228,13 @@ class Game:
                     naked_x.add((frozenset(x_set), cands))
         if naked_x:
             for cells, values in naked_x:
-                neighbours = self.unsolved_common_neighbours(cells=cells)
-                self.remove_candidates(group=neighbours, values=values)
-            return True
+                resp = False
+                common = self.unsolved_common_neighbours(cells=cells)
+                cwc = self.cells_with_candidates(group=common, values=values)
+                if cwc:
+                    resp = True
+                    self.remove_candidates(group=cwc, values=values)
+            return resp
         else:
             return False
 
@@ -254,3 +246,18 @@ class Game:
 
     def find_naked_quads(self):
         return self.find_naked_x(4)
+
+    def find_hidden_singles(self):
+        hidden_singles = set()
+        for group in group_iterator():
+            for cand in self.candidates_in_group(group=group):
+                possible = self.cells_with_candidate(group=group, value=cand)
+                if len(possible) == 1:
+                    hidden_singles.add((next(iter(possible)), cand))
+
+        if hidden_singles:
+            for (c, v) in hidden_singles:
+                self.add_to_grid(cell=c, value=v)
+            return True
+        else:
+            return False

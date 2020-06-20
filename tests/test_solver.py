@@ -258,6 +258,17 @@ def test_cells_with_candidate():
         assert cwc(group=row_j7, value='7') == {'J2', 'J3'}
 
 
+def test_cells_with_candidates():
+    with GameInstance() as game:
+        cwc = game.cells_with_candidates
+        # uns = game.unsolved_in_group(group=row_j7)
+        # print([(u, game.candidates_.get(u)) for u in uns])
+        assert cwc(group=row_a1, values={'3', '9'}) == {'A7', 'A8', 'A9'}
+        assert cwc(group=col_d3, values={'1', '5'}) == {'G3', 'A3'}
+        assert cwc(group=box_f7, values={'2', '6'}) == {'F9', 'D9'}
+        assert cwc(group=row_j7, values={'7', '2'}) == {'J1', 'J2', 'J3'}
+
+
 def test_find_naked_singles():
     with GameInstance() as game:
         assert game.find_naked_singles()

@@ -82,14 +82,13 @@ def common_neighbours(*, cells, inc=True):
 
 
 class Game:
-    def __init__(self, *, grid, params=None):
+    def __init__(self, *, grid, solvers=None):
         self.initial_grid = grid.copy()
         self.grid = grid
-        self.params = params
         self.errors = set()
         self.invalid_cells = set()
         self.candidates_ = self.init_candidates()
-        self.solvers = self.init_solvers(params=params)
+        self.solvers = self.init_solvers(solvers=solvers)
 
     def init_candidates(self):
         candidates = defaultdict(set)
@@ -101,14 +100,14 @@ class Game:
                 candidates[cell] = values
         return dict(candidates)
 
-    def init_solvers(self, *, params):
-        methods = {'find_naked_singles': self.find_naked_singles,
-                   'find_hidden_singles': self.find_hidden_singles,
-                   'find_naked_pairs': self.find_naked_pairs,
-                   'find_naked_triples': self.find_naked_triples,
-                   'find_naked_quads': self.find_naked_quads}
+    def init_solvers(self, *, solvers):
+        methods = {'naked_singles': self.find_naked_singles,
+                   'hidden_singles': self.find_hidden_singles,
+                   'naked_pairs': self.find_naked_pairs,
+                   'naked_triples': self.find_naked_triples,
+                   'naked_quads': self.find_naked_quads}
         return [m for k, m in methods.items()
-                if params.get(k) is True or params.get(k) == 'True']
+                if solvers.get(k) is True or solvers.get(k) == 'True']
 
     def solve(self):
         changed = True

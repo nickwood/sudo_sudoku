@@ -3,11 +3,11 @@ from flask import render_template
 from .solver import invalid, Game, grid_iterator
 
 
-DEFAULT_PARAMS = {'find_naked_singles': True,
-                  'find_hidden_singles': True,
-                  'find_naked_pairs': True,
-                  'find_naked_triples': True,
-                  'find_naked_quads': True}
+DEFAULT_METHODS = {'naked_singles': True,
+                   'hidden_singles': True,
+                   'naked_pairs': True,
+                   'naked_triples': True,
+                   'naked_quads': True}
 
 
 def split_post(*, post_data):
@@ -15,22 +15,24 @@ def split_post(*, post_data):
     to work with. This helper functrion splits it into two dicts, one contains
     the grid information, and the other contains everything else (e.g. solver
     contraints)'''
-    # print(post_data)
-    grid_keys = set([k for k in grid_iterator()])
-    grid_data = {key: post_data[key] for key in post_data.keys() & grid_keys}
-    other_data = {key: post_data[key] for key in post_data.keys() - grid_keys}
-    return grid_data, ChainMap(other_data, DEFAULT_PARAMS)
+    grid = filter_keys(post_data, 'grid_')
+    candidates = filter_keys(post_data, 'cand_')
+    methods = ChainMap(filter_keys(post_data, 'find_'), DEFAULT_METHODS)
+    return grid, methods, candidates
 
 
-def check_invalid(*, grid, params):
-    invalid_cells = invalid(grid=grid)
-    if invalid_cells:
-        errors = ['Invalid entries at: ' + ', '.join(invalid_cells)]
-        return render_template('base.html',
-                               grid=grid,
-                               params=params,
-                               errors=errors,
-                               invalid=invalid_cells)
+def filter_keys(data, prefix):
+    selected_keys = {k for k in data if k.startswith(prefix)}
+    return {k[len(prefix):]: data[k] for k in selected_keys}
+
+
+def render_invalid(*, grid, solvers, invalid):
+    errors = ['Invalid entries at: ' + ', '.join(invalid)]
+    return render_template('base.html',
+                           grid=grid,
+                           solvers=solvers,
+                           errors=errors,
+                           invalid=invalid)
 
 
 demo_easy = {'A1': '5', 'A2': '6', 'A4': '8', 'A5': '4', 'A6': '7',
@@ -55,39 +57,52 @@ demo_hard = {'C3': '7', 'E5': '2', 'A4': '7', 'A2': '2', 'G4': '2', 'J4': '9',
              'C9': '6', 'C4': '4', 'H1': '7', 'D5': '9', 'G7': '5', 'D4': '8',
              'G9': '1', 'G5': '7', 'H4': '3', 'A1': '3', 'G3': '9', 'C6': '8',
              'C1': '9', 'A6': '9', 'D2': '7', 'G1': '4'}
+demo_x = {'E8': '5', 'A8': '1', 'G2': '6', 'D4': '2', 'H2': '8', 'G8': '8',
+          'C6': '5', 'G4': '1', 'A4': '8', 'B3': '8', 'C1': '1', 'F7': '1',
+          'B7': '9', 'J9': '2', 'G1': '9', 'F4': '5', 'C7': '7', 'G6': '7',
+          'E3': '1', 'H4': '6', 'J7': '6', 'D8': '4', 'H6': '9', 'G5': '2',
+          'F9': '3', 'E1': '8', 'G3': '4', 'H8': '7', 'J8': '9', 'H9': '1',
+          'H7': '4', 'G9': '5', 'J2': '1', 'D9': '9', 'E7': '2', 'H5': '5',
+          'H3': '2', 'C8': '2', 'E4': '9', 'A7': '5', 'H1': '3', 'G7': '3',
+          'C9': '8', 'D7': '8', 'E6': '6', 'B4': '7', 'B8': '3', 'J4': '4',
+          'F8': '6', 'C4': '3', 'A3': '3', 'E9': '7'}
 
 
-def render_defaults(*, grid=demo_mid, params=DEFAULT_PARAMS, errors=None,
+def render_defaults(*, grid=demo_easy, solvers=DEFAULT_METHODS, errors=None,
                     invalid=None):
     return render_template('base.html',
                            grid=grid,
-                           params=params,
+                           solvers=solvers,
                            errors=errors,
                            invalid=invalid)
 
 
 def do_solve(*, post_data):
-    grid, params = split_post(post_data=dict(post_data))
-    if resp := check_invalid(grid=grid, params=params):
-        return resp
+    grid, solvers, _ = split_post(post_data=dict(post_data))
+    if inv := invalid(grid=grid):
+        return render_invalid(grid=grid,
+                              solvers=solvers,
+                              invalid=inv)
 
-    to_solve = Game(grid=grid, params=params)
+    to_solve = Game(grid=grid, solvers=solvers)
     to_solve.solve()
     return render_defaults(grid=to_solve.grid,
-                           params=params,
+                           solvers=solvers,
                            errors=to_solve.errors,
                            invalid=to_solve.invalid_cells)
 
 
 def do_step(*, post_data):
-    grid, params = split_post(post_data=dict(post_data))
-    if resp := check_invalid(grid=grid, params=params):
-        return resp
+    grid, solvers, _ = split_post(post_data=dict(post_data))
+    if inv := invalid(grid=grid):
+        return render_invalid(grid=grid,
+                              solvers=solvers,
+                              invalid=inv)
 
-    to_solve = Game(grid=grid, params=params)
+    to_solve = Game(grid=grid, solvers=solvers)
     to_solve.solve_step()
     return render_defaults(grid=to_solve.grid,
-                           params=params,
+                           solvers=solvers,
                            errors=to_solve.errors,
                            invalid=to_solve.invalid_cells)
 

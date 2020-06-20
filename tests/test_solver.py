@@ -131,12 +131,12 @@ DEFAULT_PARAMS = {'find_naked_singles': True,
 
 
 class GameInstance():
-    def __init__(self, grid=TEST_GRID, params=DEFAULT_PARAMS):
+    def __init__(self, grid=TEST_GRID, solvers=DEFAULT_PARAMS):
         self.grid = grid.copy()
-        self.params = params
+        self.solvers = solvers
 
     def __enter__(self):
-        g = solver.Game(grid=self.grid, params=self.params)
+        g = solver.Game(grid=self.grid, solvers=self.solvers)
         return g
 
     def __exit__(self, *args, **kwargs):
@@ -372,6 +372,19 @@ def test_naked_quads():
         assert game.candidates_['E9'] == set(list('79'))
         assert game.candidates_['F9'] == set(list('2358'))
         assert game.candidates_['H9'] == set(list('28'))
+
+
+GRID_X_WING = {'E8': '5', 'A8': '1', 'G2': '6', 'D4': '2', 'H2': '8',
+               'G8': '8', 'C6': '5', 'G4': '1', 'A4': '8', 'B3': '8',
+               'C1': '1', 'F7': '1', 'B7': '9', 'J9': '2', 'G1': '9',
+               'F4': '5', 'C7': '7', 'G6': '7', 'E3': '1', 'H4': '6',
+               'J7': '6', 'D8': '4', 'H6': '9', 'G5': '2', 'F9': '3',
+               'E1': '8', 'G3': '4', 'H8': '7', 'J8': '9', 'H9': '1',
+               'H7': '4', 'G9': '5', 'J2': '1', 'D9': '9', 'E7': '2',
+               'H5': '5', 'H3': '2', 'C8': '2', 'E4': '9', 'A7': '5',
+               'H1': '3', 'G7': '3', 'C9': '8', 'D7': '8', 'E6': '6',
+               'B4': '7', 'B8': '3', 'J4': '4', 'F8': '6', 'C4': '3',
+               'A3': '3', 'E9': '7'}
 
 
 def test_find_hidden_singles():

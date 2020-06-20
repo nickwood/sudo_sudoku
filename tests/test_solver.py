@@ -191,10 +191,11 @@ def test_values_not_in_group():
 
 def test_candidates_in_group():
     with GameInstance() as game:
-        assert game.candidates_in_group(group=col_a1) == set(list('124689'))
-        assert game.candidates_in_group(group=box_f7) == set(list('23567'))
-        assert game.candidates_in_group(group=['H2', 'H4']) == set(list('23459'))  # noqa: E501
-        assert game.candidates_in_group(group=['J1', 'J2', 'J3']) == set(list('2478'))  # noqa: E501
+        cig = game.candidates_in_group
+        assert cig(group=col_a1) == set(list('124689'))
+        assert cig(group=box_f7) == set(list('23567'))
+        assert cig(group=['H2', 'H4']) == set(list('23459'))
+        assert cig(group=['J1', 'J2', 'J3']) == set(list('2478'))
 
 
 def test_solved_cell():
@@ -212,9 +213,10 @@ def test_solved_cell():
 
 def test_solved_in_group():
     with GameInstance() as game:
-        assert game.solved_in_group(group=col_a1) == {'A1', 'B1', 'E1'}
-        assert game.solved_in_group(group=row_j7) == {'J4', 'J5', 'J6', 'J8', 'J9'}  # noqa: E501
-        assert game.solved_in_group(group=box_f7) == {'D8', 'E8', 'E9', 'F8'}
+        sig = game.solved_in_group
+        assert sig(group=col_a1) == {'A1', 'B1', 'E1'}
+        assert sig(group=row_j7) == {'J4', 'J5', 'J6', 'J8', 'J9'}
+        assert sig(group=box_f7) == {'D8', 'E8', 'E9', 'F8'}
 
         T1 = {'G7', 'H7', 'H9', 'B7', 'J4', 'J5', 'J6', 'J8', 'J9'}
         assert game.solved_in_group(group=all_j7) == T1
@@ -225,45 +227,44 @@ def test_solved_in_group():
 
 def test_unsolved_in_group():
     with GameInstance() as game:
-        assert game.unsolved_in_group(group=row_j7) == {'J1', 'J2', 'J3', 'J7'}
-        assert game.unsolved_in_group(group=box_f7) == {'D7', 'E7', 'F7', 'D9', 'F9'}  # noqa: E501
+        uig = game.unsolved_in_group
+        assert uig(group=row_j7) == {'J1', 'J2', 'J3', 'J7'}
+        assert uig(group=box_f7) == {'D7', 'E7', 'F7', 'D9', 'F9'}
 
-        T1 = {'J3', 'J2', 'A7', 'C7', 'F7', 'J1', 'G9', 'G8', 'J7', 'H8', 'D7', 'E7'}  # noqa: E501
-        assert game.unsolved_in_group(group=all_j7) == T1
+        T1 = {'J3', 'J2', 'A7', 'C7', 'F7', 'J1', 'G9',
+              'G8', 'J7', 'H8', 'D7', 'E7'}
+        assert uig(group=all_j7) == T1
 
         G1 = {'A7', 'A8', 'A9', 'B7', 'B8', 'B9', 'C7', 'C8', 'C9'}
-        assert game.unsolved_in_group(group=G1) == G1 - {'B7'}
+        assert uig(group=G1) == G1 - {'B7'}
 
 
 def test_unsolved_common_neighbours():
     with GameInstance() as game:
-        T1 = {'A3', 'A7', 'A8'}
-        assert game.unsolved_common_neighbours(cells=('A1', 'A9')) == T1
-        T2 = {'B2', 'C2', 'D1', 'D3', 'E3', 'F1', 'F3', 'G2', 'H2', 'J2'}
-        assert game.unsolved_common_neighbours(cells=('D2', 'E2')) == T2
-        T3 = {'J1', 'J3'}
-        assert game.unsolved_common_neighbours(cells=('J7', 'J2')) == T3
+        ucn = game.unsolved_common_neighbours
+        assert ucn(cells=('A1', 'A9')) == {'A3', 'A7', 'A8'}
+        assert ucn(cells=('J7', 'J2')) == {'J1', 'J3'}
+        exp = {'B2', 'C2', 'D1', 'D3', 'E3', 'F1', 'F3', 'G2', 'H2', 'J2'}
+        assert ucn(cells=('D2', 'E2')) == exp
+
+
+def test_cells_with_candidate():
+    with GameInstance() as game:
+        cwc = game.cells_with_candidate
+        assert cwc(group=['J2', 'A9', 'B9', 'E5'], value='7') == {'J2'}
+        assert cwc(group=row_a1, value='9') == {'A7'}
+        assert cwc(group=col_d3, value='4') == {'E3', 'F3', 'G3', 'J3'}
+        assert cwc(group=box_f7, value='7') == {'F7', 'D7'}
+        assert cwc(group=row_j7, value='7') == {'J2', 'J3'}
 
 
 def test_find_naked_singles():
     with GameInstance() as game:
-        act = game.find_naked_singles()
-        assert ('H8', '3') in act
-        assert ('J7', '4') in act
-        assert ('F7', '7') in act
-        assert ('E5', '5') in act
-        assert len(act) == 4
-
-
-def test_find_hidden_singles():
-    with GameInstance() as game:
-        singles = [('A7', '9'), ('F1', '8'), ('G3', '5'), ('B8', '8'),
-                   ('C5', '6'), ('C6', '3'), ('G5', '7'), ('E3', '4'),
-                   ('G6', '8'), ('H1', '1'), ('G8', '6'), ('G9', '1')]
-        act = game.find_hidden_singles()
-
-        for s in singles:
-            assert s in act
+        assert game.find_naked_singles()
+        assert game.grid['H8'] == '3'
+        assert game.grid['J7'] == '4'
+        assert game.grid['F7'] == '7'
+        assert game.grid['E5'] == '5'
 
 
 GRID_NAKED_PAIR = {'H7': '6', 'D3': '2', 'B3': '1', 'C6': '1', 'B6': '9',
@@ -360,3 +361,15 @@ def test_naked_quads():
         assert game.candidates_['E9'] == set(list('79'))
         assert game.candidates_['F9'] == set(list('2358'))
         assert game.candidates_['H9'] == set(list('28'))
+
+
+def test_find_hidden_singles():
+    with GameInstance() as game:
+        assert game.find_hidden_singles()
+        exp_singles = [('A7', '9'), ('F1', '8'), ('G3', '5'), ('B8', '8'),
+                       ('C5', '6'), ('C6', '3'), ('G5', '7'), ('E3', '4'),
+                       ('G6', '8'), ('H1', '1'), ('G8', '6'), ('G9', '1')]
+        print('foo', game.grid)
+
+        for (c, v) in exp_singles:
+            assert game.grid[c] == v

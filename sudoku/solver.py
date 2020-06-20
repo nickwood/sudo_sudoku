@@ -88,8 +88,18 @@ class Game:
         self.params = params
         self.errors = set()
         self.invalid_cells = set()
-        self.candidates_ = None
+        self.candidates_ = self.init_candidates()
         self.solvers = self.init_solvers(params=params)
+
+    def init_candidates(self):
+        candidates = defaultdict(set)
+        grid = self.grid
+        for cell in grid_iterator():
+            if grid.get(cell, '') == '':
+                neighbours = all_neighbours(cell=cell)
+                values = self.values_not_in_group(group=neighbours)
+                candidates[cell] = values
+        return dict(candidates)
 
     def init_solvers(self, *, params):
         methods = {'find_naked_singles': self.find_naked_singles,
@@ -100,18 +110,7 @@ class Game:
         return [m for k, m in methods.items()
                 if params.get(k) is True or params.get(k) == 'True']
 
-    def initialise_candidates(self):  # TODO: move to __init__
-        candidates = defaultdict(set)
-        grid = self.grid
-        for cell in grid_iterator():
-            if grid.get(cell, '') == '':
-                neighbours = all_neighbours(cell=cell)
-                values = self.values_not_in_group(group=neighbours)
-                candidates[cell] = values
-        self.candidates_ = dict(candidates)
-
     def solve(self):
-        self.initialise_candidates()
         old_state = None
         while old_state != self.grid:
             old_state = self.grid.copy()
@@ -131,8 +130,7 @@ class Game:
         return True
 
     def solve_step(self):
-        if self.candidates_ is None:
-            self.initialise_candidates()
+        # print({k: v for k, v in self.grid.items() if v != ''})
         for method in self.solvers:
             if modified := method():
                 if modified is True:

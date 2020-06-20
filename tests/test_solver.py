@@ -137,7 +137,6 @@ class GameInstance():
 
     def __enter__(self):
         g = solver.Game(grid=self.grid, params=self.params)
-        g.initialise_candidates()
         return g
 
     def __exit__(self, *args, **kwargs):

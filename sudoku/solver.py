@@ -9,6 +9,11 @@ ALL_VALUES = frozenset('123456789')
 ROW_GROUPS = ['ABC', 'DEF', 'GHJ']
 COL_GROUPS = ['123', '456', '789']
 
+NAME_OF_MULTIPLE = {1: 'single',
+                    2: 'pair',
+                    3: 'triple',
+                    4: 'quad'}
+
 
 def invalid(*, grid):
     invalid = set()
@@ -88,6 +93,7 @@ class Game:
         self.errors = set()
         self.invalid_cells = set()
         self.candidates_ = self.init_candidates()
+        self.logs = []
         self.solvers = self.init_solvers(solvers=solvers)
 
     def init_candidates(self):
@@ -134,7 +140,7 @@ class Game:
             if method() is True:
                 return True
 
-        # TODO: move to standalone method
+        # TODO: move to standalone method?
         for cell, candidates in self.candidates_.items():
             if candidates == set():
                 msg = 'No remaining candidates for %s' % cell
@@ -210,6 +216,7 @@ class Game:
 
         if found:
             for (c, v) in found:
+                self.logs.append("Naked single at %s: %s" % (c, v))
                 self.add_to_grid(cell=c, value=v)
             return True
         else:
@@ -232,6 +239,8 @@ class Game:
                 cwc = self.cells_with_candidates(group=common, values=values)
                 if cwc:
                     resp = True
+                    self.logs.append(f"Naked {NAME_OF_MULTIPLE[x]} at "
+                                     f"{tuple(cells)}: {tuple(values)}")
                     self.remove_candidates(group=cwc, values=values)
             return resp
         else:
@@ -256,6 +265,7 @@ class Game:
 
         if hidden_singles:
             for (c, v) in hidden_singles:
+                self.logs.append("Hidden single at %s: %s" % (c, v))
                 self.add_to_grid(cell=c, value=v)
             return True
         else:

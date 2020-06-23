@@ -19,7 +19,7 @@
     {% set invalid = [] %}
     {% endif %}
     {% if errors is defined and errors is not none %}
-    <div id="messages">
+    <div id="errors">
         {% for err in errors %}
         <p>{{ err }}</p>
         {% endfor %}

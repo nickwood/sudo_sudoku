@@ -28,10 +28,10 @@ body {
           text-align: center;
           text-decoration: none; }
 
-#messages {
+#errors {
   background-color: #ffc74e;
   width: 100%; }
-  #messages p {
+  #errors p {
     color: #666;
     height: 30px;
     font-size: 18px;

@@ -25,46 +25,54 @@
         {% endfor %}
     </div>
     {% endif %}
-    <form id="interface" action="/solve" method="post">
     <div id="content">
-        <table id="grid" style="border-collapse: collapse;">
-        {% for row in 'ABCDEFGHJ' %}
-        <tr class="row">
-            {% for col in '123456789' %}
-                {% set cell = row + col|string %}
-                <td class="cell">
-                    <input class="{{ 'invalid' if cell in invalid }}" 
-                    type="text" name="grid_{{ cell }}" 
-                    value="{{ grid.get(cell, '') }}" 
-                    maxlength="1">
-                </td>
-            {% endfor %}
-            </tr>
-        {% endfor %}
-        </table>
-        <div id="advanced">
-            <h2>Allowed Solvers</h2>
-            {% for k, v in solvers.items() %}
-                <label class="container">{{ k }}
-                <input type="checkbox"
-                id="{{ k }}"
-                name="find_{{ k }}"
-                {{ "checked" if v is true or v == "True" }}
-                value="True">
-                <input type="hidden" value="False" name="find_{{ k }}">
-                <span class="checkmark"></span>
-                </label><br>
+        <form id="interface" action="/solve" method="post">
+            <table id="grid" style="border-collapse: collapse;">
+            {% for row in 'ABCDEFGHJ' %}
+            <tr class="row">
+                {% for col in '123456789' %}
+                    {% set cell = row + col|string %}
+                    <td class="cell">
+                        <input class="{{ 'invalid' if cell in invalid }}" 
+                        type="text" name="grid_{{ cell }}" 
+                        value="{{ grid.get(cell, '') }}" 
+                        maxlength="1">
+                    </td>
                 {% endfor %}
-        </div>
+                </tr>
+            {% endfor %}
+            </table>
+            <div id="advanced">
+                <h2>Allowed Solvers</h2>
+                {% for k, v in solvers.items() %}
+                    <label class="container">{{ k }}
+                    <input type="checkbox"
+                    id="{{ k }}"
+                    name="find_{{ k }}"
+                    {{ "checked" if v is true or v == "True" }}
+                    value="True">
+                    <input type="hidden" value="False" name="find_{{ k }}">
+                    <span class="checkmark"></span>
+                    </label><br>
+                    {% endfor %}
+            </div>
+            <div class="break"></div>
+            <div id="controls">
+                {% for action in ['step', 'solve', 'clear', 'generate'] %}
+                <button type="submit" formaction="{{action}}">{{action}}</button>
+                {% endfor %}
+            </div>
+        </form>
+        {% if logs is defined and logs is not none %}
         <div class="break"></div>
-        <div id="controls">
-            {% for action in ['step', 'solve', 'clear', 'generate'] %}
-            <button type="submit" formaction="{{action}}">{{action}}</button>
+        <div id="logs">
+            {% for l in logs %}
+            <p>{{ l }}</p>
             {% endfor %}
         </div>
+        {% endif %}
     </div>
-    </form>
-    <!-- </div> -->
+
     <div id="footer">
         {% block footer %}
         This work is licensed under the terms of the <a href="https://opensource.org/licenses/MIT">MIT license</a><br>

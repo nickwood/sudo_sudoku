@@ -69,12 +69,13 @@ demo_x = {'E8': '5', 'A8': '1', 'G2': '6', 'D4': '2', 'H2': '8', 'G8': '8',
 
 
 def render_defaults(*, grid=demo_easy, solvers=DEFAULT_METHODS, errors=None,
-                    invalid=None):
+                    invalid=None, logs=None):
     return render_template('base.html',
                            grid=grid,
                            solvers=solvers,
                            errors=errors,
-                           invalid=invalid)
+                           invalid=invalid,
+                           logs=logs)
 
 
 def do_solve(*, post_data):

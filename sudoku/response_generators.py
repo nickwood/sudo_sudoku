@@ -1,6 +1,6 @@
 from collections import ChainMap
 from flask import render_template
-from .solver import invalid, Game, grid_iterator
+from .solver import invalid, Game
 
 
 DEFAULT_METHODS = {'naked_singles': True,

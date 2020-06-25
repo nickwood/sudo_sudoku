@@ -261,12 +261,17 @@ def test_cells_with_candidate():
 def test_cells_with_candidates():
     with GameInstance() as game:
         cwc = game.cells_with_candidates
-        # uns = game.unsolved_in_group(group=row_j7)
-        # print([(u, game.candidates_.get(u)) for u in uns])
         assert cwc(group=row_a1, values={'3', '9'}) == {'A7', 'A8', 'A9'}
         assert cwc(group=col_d3, values={'1', '5'}) == {'G3', 'A3'}
         assert cwc(group=box_f7, values={'2', '6'}) == {'F9', 'D9'}
         assert cwc(group=row_j7, values={'7', '2'}) == {'J1', 'J2', 'J3'}
+
+
+def test_empty_rectangles():
+    with GameInstance() as game:
+        rectangles = [r for r in game.empty_rectangles()]
+        assert len(rectangles) == 191
+        assert (['H1', 'H2', 'J1', 'J2'] in rectangles)
 
 
 def test_find_naked_singles():
@@ -374,6 +379,17 @@ def test_naked_quads():
         assert game.candidates_['H9'] == set(list('28'))
 
 
+def test_find_hidden_singles():
+    with GameInstance() as game:
+        assert game.find_hidden_singles()
+        exp_singles = [('A7', '9'), ('F1', '8'), ('G3', '5'), ('B8', '8'),
+                       ('C5', '6'), ('C6', '3'), ('G5', '7'), ('E3', '4'),
+                       ('G6', '8'), ('H1', '1'), ('G8', '6'), ('G9', '1')]
+
+        for (c, v) in exp_singles:
+            assert game.grid[c] == v
+
+
 GRID_X_WING = {'E8': '5', 'A8': '1', 'G2': '6', 'D4': '2', 'H2': '8',
                'G8': '8', 'C6': '5', 'G4': '1', 'A4': '8', 'B3': '8',
                'C1': '1', 'F7': '1', 'B7': '9', 'J9': '2', 'G1': '9',
@@ -387,13 +403,10 @@ GRID_X_WING = {'E8': '5', 'A8': '1', 'G2': '6', 'D4': '2', 'H2': '8',
                'A3': '3', 'E9': '7'}
 
 
-def test_find_hidden_singles():
-    with GameInstance() as game:
-        assert game.find_hidden_singles()
-        exp_singles = [('A7', '9'), ('F1', '8'), ('G3', '5'), ('B8', '8'),
-                       ('C5', '6'), ('C6', '3'), ('G5', '7'), ('E3', '4'),
-                       ('G6', '8'), ('H1', '1'), ('G8', '6'), ('G9', '1')]
-        print('foo', game.grid)
-
-        for (c, v) in exp_singles:
-            assert game.grid[c] == v
+def test_find_x_wings():
+    with GameInstance(grid=GRID_X_WING) as game:
+        expected_updates = ['A2', 'B2', 'F2', 'A5', 'B5', 'F5']
+        for c in expected_updates:
+            assert '4' in game.candidates_[c]
+        assert game.find_x_wings()
+        assert '4' not in game.candidates_in_group(group=expected_updates)

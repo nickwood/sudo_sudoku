@@ -1,5 +1,5 @@
 from collections import defaultdict
-from itertools import combinations
+from itertools import combinations, product
 from functools import lru_cache
 
 
@@ -36,7 +36,7 @@ def group_iterator():
 
 
 @lru_cache(None)
-def cells_in_row(*, cell, inc=True):
+def cells_in_row(cell, inc=True):
     row, _ = cell
     if inc:
         return frozenset(row + col for col in ALL_COLS)
@@ -45,7 +45,7 @@ def cells_in_row(*, cell, inc=True):
 
 
 @lru_cache(None)
-def cells_in_col(*, cell, inc=True):
+def cells_in_col(cell, inc=True):
     _, col = cell
     if inc:
         return frozenset(row + col for row in ALL_ROWS)
@@ -54,7 +54,7 @@ def cells_in_col(*, cell, inc=True):
 
 
 @lru_cache(None)
-def cells_in_box(*, cell, inc=True):
+def cells_in_box(cell, inc=True):
     row, col = cell
     for i in COL_GROUPS:
         if col in i:
@@ -111,7 +111,8 @@ class Game:
                    'hidden_singles': self.find_hidden_singles,
                    'naked_pairs': self.find_naked_pairs,
                    'naked_triples': self.find_naked_triples,
-                   'naked_quads': self.find_naked_quads}
+                   'naked_quads': self.find_naked_quads,
+                   'x_wings': self.find_x_wings}
         return [m for k, m in methods.items()
                 if solvers.get(k) is True or solvers.get(k) == 'True']
 
@@ -175,6 +176,10 @@ class Game:
     def candidates_in_group(self, *, group):
         return set.union(*[self.candidates_.get(c, set()) for c in group])
 
+    def common_candidates_in_group(self, *, group):
+        return set.intersection(*[self.candidates_.get(c, set())
+                                  for c in group])
+
     def solved_cell(self, *, cell):
         '''return True if cell is solved (or provided) False otherwise'''
         if self.grid.get(cell) in ALL_VALUES:
@@ -206,6 +211,24 @@ class Game:
         for v in values:
             cells |= self.cells_with_candidate(group=group, value=v)
         return cells
+
+    def empty_rectangles(self):
+        '''generator function which successively returns a group of 4 empty
+        cells on the corners of a rectangle
+        NB. Due to the way these cells are found we can guarantee that elements
+        0,1 & 2,3 will share rows and 0,2 and 1,3 share columns'''
+        row_empties = {}
+        for row_ref in ALL_ROWS:
+            row = cells_in_row(cell=row_ref+'1', inc=True)
+            empties = {c[1] for c in self.unsolved_in_group(group=row)}
+            edge_sets = (product(row_ref + comp_row_ref, col_refs)
+                         for comp_row_ref, comp_empties in row_empties.items()
+                         if len(intersect := empties & comp_empties) >= 2
+                         for col_refs in combinations(intersect, 2))
+            for edge in edge_sets:
+                yield sorted([r+c for r, c in edge])
+
+            row_empties[row_ref] = empties
 
     def find_naked_singles(self):
         found = set()
@@ -267,6 +290,44 @@ class Game:
             for (c, v) in hidden_singles:
                 self.logs.append("Hidden single at %s: %s" % (c, v))
                 self.add_to_grid(cell=c, value=v)
+            return True
+        else:
+            return False
+
+    def find_x_wings(self):
+        x_wings = set()
+        for rectangle in self.empty_rectangles():
+            shared_cands = self.common_candidates_in_group(group=rectangle)
+            for c in shared_cands:
+                # top left, top right, bottom left, bottom right
+                tl, tr, bl, br = rectangle
+                r1 = cells_in_row(tl)
+                r2 = cells_in_row(bl)
+                c1 = cells_in_col(tl)
+                c2 = cells_in_col(tr)
+
+                r1_with_c = self.cells_with_candidates(group=r1, values={c})
+                r2_with_c = self.cells_with_candidates(group=r2, values={c})
+                c1_with_c = self.cells_with_candidates(group=c1, values={c})
+                c2_with_c = self.cells_with_candidates(group=c2, values={c})
+
+                if (len(r1_with_c) == 2 and len(r2_with_c) == 2 and
+                        (len(c1_with_c) > 2 or len(c2_with_c) > 2)):
+                    locked = set(rectangle)
+                    remove_from = frozenset((c1_with_c | c2_with_c) - locked)
+                    x_wings.add((tuple(rectangle), c, remove_from))
+
+                if (len(c1_with_c) == 2 and len(c2_with_c) == 2 and
+                        (len(r1_with_c) > 2 or len(r2_with_c) > 2)):
+                    locked = set(rectangle)
+                    remove_from = frozenset((r1_with_c | r2_with_c) - locked)
+                    x_wings.add((tuple(rectangle), c, remove_from))
+
+        if x_wings:
+            for (rectangle, v, remove_from) in x_wings:
+                self.logs.append(f"X_wing at {rectangle}: removing {v} as "
+                                 f"candidate from: {tuple(remove_from)}")
+                self.remove_candidates(group=remove_from, values={v})
             return True
         else:
             return False

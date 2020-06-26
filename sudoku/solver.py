@@ -319,10 +319,10 @@ class Game:
                 c1 = cells_in_col(tl)
                 c2 = cells_in_col(tr)
 
-                r1_with_c = self.cells_with_candidates(group=r1, values={c})
-                r2_with_c = self.cells_with_candidates(group=r2, values={c})
-                c1_with_c = self.cells_with_candidates(group=c1, values={c})
-                c2_with_c = self.cells_with_candidates(group=c2, values={c})
+                r1_with_c = self.cells_with_candidate(group=r1, value=c)
+                r2_with_c = self.cells_with_candidate(group=r2, value=c)
+                c1_with_c = self.cells_with_candidate(group=c1, value=c)
+                c2_with_c = self.cells_with_candidate(group=c2, value=c)
 
                 if (len(r1_with_c) == 2 and len(r2_with_c) == 2 and
                         (len(c1_with_c) > 2 or len(c2_with_c) > 2)):

@@ -131,25 +131,26 @@ def test_all_neighbours():
 
 
 def test_common_neighbours():
-    assert solver.common_neighbours(cells=['A1', 'A6']) == row_a1
-    assert solver.common_neighbours(cells=['A1', 'D1']) == col_a1
-    assert solver.common_neighbours(cells=['D8', 'F7']) == box_f7
+    common = solver.common_neighbours
+    assert common(cells=['A1', 'A6']) == row_a1
+    assert common(cells=['A1', 'D1']) == col_a1
+    assert common(cells=['D8', 'F7']) == box_f7
     T1 = {'D4', 'E4', 'F4', 'D5', 'E5', 'F5', 'D6', 'E6', 'F6', 'A4', 'B4',
           'C4', 'G4', 'H4', 'J4'}
-    assert solver.common_neighbours(cells=['E4', 'D4']) == T1
+    assert common(cells=['E4', 'D4']) == T1
     T2 = {'A7', 'A8', 'A9', 'B7', 'B8', 'B9', 'C7', 'C8', 'C9'}
-    assert solver.common_neighbours(cells=['C9', 'B8']) == T2
-    assert solver.common_neighbours(cells=['A1', 'J7']) == {'J1', 'A7'}
+    assert common(cells=['C9', 'B8']) == T2
+    assert common(cells=['A1', 'J7']) == {'J1', 'A7'}
 
-    assert solver.common_neighbours(cells=['A1', 'A6'], inc=False) == row_a1 - {'A1', 'A6'}  # noqa: E501
-    assert solver.common_neighbours(cells=['A1', 'D1'], inc=False) == col_a1 - {'A1', 'D1'}  # noqa: E501
-    assert solver.common_neighbours(cells=['D8', 'F7'], inc=False) == box_f7 - {'F7', 'D8'}  # noqa: E501
+    assert common(cells=['A1', 'A6'], inc=False) == row_a1 - {'A1', 'A6'}
+    assert common(cells=['A1', 'D1'], inc=False) == col_a1 - {'A1', 'D1'}
+    assert common(cells=['D8', 'F7'], inc=False) == box_f7 - {'F7', 'D8'}
     T3 = {'F4', 'D5', 'E5', 'F5', 'D6', 'E6', 'F6', 'A4', 'B4', 'C4', 'G4',
           'H4', 'J4'}
-    assert solver.common_neighbours(cells=['E4', 'D4'], inc=False) == T3
+    assert common(cells=['E4', 'D4'], inc=False) == T3
     T4 = {'A7', 'A8', 'A9', 'B7', 'B9', 'C7', 'C8'}
-    assert solver.common_neighbours(cells=['C9', 'B8'], inc=False) == T4
-    assert solver.common_neighbours(cells=['A1', 'J7'], inc=False) == {'J1', 'A7'}  # noqa: E501
+    assert common(cells=['C9', 'B8'], inc=False) == T4
+    assert common(cells=['A1', 'J7'], inc=False) == {'J1', 'A7'}
 
 
 TEST_GRID = {'A1': '5', 'A2': '6', 'A4': '8', 'A5': '4', 'A6': '7', 'B1': '3',

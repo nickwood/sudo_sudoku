@@ -436,7 +436,7 @@ GRID_POINTING_MULT = {'F7': '2', 'A2': '1', 'F2': '6', 'C7': '5', 'D3': '2',
 def test_pointing_multiples():
     with GameInstance(grid=GRID_POINTING_MULT) as game:
         expected_3 = ['B1', 'B2', 'B3']
-        expected_9 = ['E5' ,'E7', 'E9']
+        expected_9 = ['E5', 'E7', 'E9']
         for c in expected_3:
             assert '3' in game.candidates_[c]
         for c in expected_9:

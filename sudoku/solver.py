@@ -125,6 +125,7 @@ class Game:
                    'naked_pairs': self.find_naked_pairs,
                    'naked_triples': self.find_naked_triples,
                    'naked_quads': self.find_naked_quads,
+                   'pointing_multiples': self.find_pointing_multiples,
                    'x_wings': self.find_x_wings}
         return [m for k, m in methods.items()
                 if solvers.get(k) is True or solvers.get(k) == 'True']
@@ -303,6 +304,27 @@ class Game:
             for (c, v) in hidden_singles:
                 self.logs.append("Hidden single at %s: %s" % (c, v))
                 self.add_to_grid(cell=c, value=v)
+            return True
+        else:
+            return False
+
+    def find_pointing_multiples(self):
+        pointing_multiples = set()
+        for box in box_iterator():
+            for cand in self.candidates_in_group(group=box):
+                cwc = self.cells_with_candidate(group=box, value=cand)
+                # nobs = neighbours_outside_box
+                nobs = common_neighbours(cells=cwc) - box
+                nobs_with_c = self.cells_with_candidate(group=nobs, value=cand)
+                if nobs_with_c:
+                    self.logs.append(f"Pointing {NAME_OF_MULTIPLE[len(cwc)]} "
+                                     f"at {cwc}: {cand}. "
+                                     f"Removing from {list(nobs_with_c)}")
+                    pointing_multiples.add((frozenset(nobs_with_c), cand))
+
+        if pointing_multiples:
+            for (cells, v) in pointing_multiples:
+                self.remove_candidates(group=cells, values={v})
             return True
         else:
             return False

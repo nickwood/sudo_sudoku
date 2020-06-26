@@ -424,6 +424,30 @@ def test_find_hidden_singles():
             assert game.grid[c] == v
 
 
+GRID_POINTING_MULT = {'F7': '2', 'A2': '1', 'F2': '6', 'C7': '5', 'D3': '2',
+                      'C1': '9', 'J8': '2', 'J3': '5', 'F8': '5', 'G8': '6',
+                      'A3': '7', 'A4': '9', 'J4': '6', 'D2': '7', 'E4': '4',
+                      'E8': '7', 'F5': '7', 'D5': '1', 'G1': '7', 'A6': '3',
+                      'B5': '8', 'E6': '2', 'G3': '1', 'D7': '4', 'F4': '3',
+                      'H5': '3', 'J7': '7', 'A7': '6', 'G9': '5', 'D8': '3',
+                      'C9': '7', 'F3': '4', 'J6': '1'}
+
+
+def test_pointing_multiples():
+    with GameInstance(grid=GRID_POINTING_MULT) as game:
+        expected_3 = ['B1', 'B2', 'B3']
+        expected_9 = ['E5' ,'E7', 'E9']
+        for c in expected_3:
+            assert '3' in game.candidates_[c]
+        for c in expected_9:
+            assert '9' in game.candidates_[c]
+        assert game.find_pointing_multiples()
+        for c in expected_3:
+            assert '3' not in game.candidates_in_group(group=expected_3)
+        for c in expected_9:
+            assert '9' not in game.candidates_in_group(group=expected_9)
+
+
 GRID_X_WING = {'E8': '5', 'A8': '1', 'G2': '6', 'D4': '2', 'H2': '8',
                'G8': '8', 'C6': '5', 'G4': '1', 'A4': '8', 'B3': '8',
                'C1': '1', 'F7': '1', 'B7': '9', 'J9': '2', 'G1': '9',

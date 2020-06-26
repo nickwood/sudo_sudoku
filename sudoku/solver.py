@@ -1,5 +1,5 @@
 from collections import defaultdict
-from itertools import combinations, product
+from itertools import chain, combinations, product
 from functools import lru_cache
 
 
@@ -29,9 +29,22 @@ def grid_iterator():
 
 
 def group_iterator():
+    for g in chain(row_iterator(), col_iterator(), box_iterator()):
+        yield g
+
+
+def row_iterator():
     for c in ['A1', 'D2', 'G3', 'B4', 'E5', 'H6', 'C7', 'F8', 'J9']:
         yield cells_in_row(cell=c)
+
+
+def col_iterator():
+    for c in ['A1', 'D2', 'G3', 'B4', 'E5', 'H6', 'C7', 'F8', 'J9']:
         yield cells_in_col(cell=c)
+
+
+def box_iterator():
+    for c in ['A1', 'D2', 'G3', 'B4', 'E5', 'H6', 'C7', 'F8', 'J9']:
         yield cells_in_box(cell=c)
 
 

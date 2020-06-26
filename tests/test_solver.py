@@ -61,6 +61,39 @@ def test_group_iterator():
     assert len(groups) == 27
 
 
+def test_row_iterator():
+    assert isinstance(solver.row_iterator(), Iterable)
+    rows = [r for r in solver.row_iterator()]
+    exp_in = [row_a1, row_c4, row_d3, row_j7]
+    exp_out = [col_d3, box_d3, all_a1]
+    for g in exp_in:
+        assert g in rows
+    for g in exp_out:
+        assert g not in rows
+
+
+def test_col_iterator():
+    assert isinstance(solver.col_iterator(), Iterable)
+    cols = [r for r in solver.col_iterator()]
+    exp_in = [col_a1, col_a4, col_d3, col_j7]
+    exp_out = [row_a1, box_d3, all_a1]
+    for g in exp_in:
+        assert g in cols
+    for g in exp_out:
+        assert g not in cols
+
+
+def test_box_iterator():
+    assert isinstance(solver.box_iterator(), Iterable)
+    boxes = [r for r in solver.box_iterator()]
+    exp_in = [box_a1, box_d3, box_f7, box_j7]
+    exp_out = [row_a1, col_d3, all_a1]
+    for g in exp_in:
+        assert g in boxes
+    for g in exp_out:
+        assert g not in boxes
+
+
 def test_cells_in_row():
     assert solver.cells_in_row(cell='A1') == row_a1
     assert solver.cells_in_row(cell='D3') == row_d3

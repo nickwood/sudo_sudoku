@@ -9,6 +9,7 @@ DEFAULT_METHODS = {'naked_singles': True,
                    'naked_triples': True,
                    'naked_quads': True,
                    'pointing_multiples': True,
+                   'box_line_reductions': True,
                    'x_wings': True}
 
 
@@ -66,6 +67,12 @@ demo_pointing_pairs = {'J8': '2', 'H5': '3', 'E8': '7', 'A6': '3', 'C9': '7',
                        'G3': '1', 'A3': '7', 'A7': '6', 'J6': '1', 'D2': '7',
                        'G8': '6', 'C1': '9', 'E6': '2', 'A4': '9', 'D3': '2',
                        'E4': '4', 'F4': '3', 'J3': '5'}
+demo_bl_red = {'J3': '3', 'D8': '7', 'G2': '6', 'C1': '4', 'B8': '2',
+               'D9': '5', 'J4': '5', 'E5': '8', 'F8': '4', 'G3': '4',
+               'J1': '1', 'E3': '7', 'A5': '4', 'A7': '7', 'F3': '1',
+               'E2': '4', 'G9': '1', 'H3': '8', 'H5': '3', 'A8': '8',
+               'B9': '4', 'B2': '7', 'F7': '2', 'D7': '6', 'A6': '2',
+               'B4': '6', 'F9': '8'}
 demo_x = {'D3': '2', 'G5': '4', 'D6': '4', 'J7': '2', 'F6': '7', 'F7': '3',
           'B8': '5', 'A4': '4', 'D2': '5', 'E3': '1', 'F5': '5', 'C4': '5',
           'C3': '3', 'C7': '7', 'H2': '2', 'E1': '3', 'C8': '8', 'B3': '6',
@@ -76,7 +83,7 @@ demo_x = {'D3': '2', 'G5': '4', 'D6': '4', 'J7': '2', 'F6': '7', 'F7': '3',
           'J6': '9', 'C2': '9', 'G8': '6', 'G7': '5'}
 
 
-def render_defaults(*, grid=demo_x, solvers=DEFAULT_METHODS,
+def render_defaults(*, grid=demo_bl_red, solvers=DEFAULT_METHODS,
                     errors=None, invalid=None, logs=None):
     return render_template('base.html',
                            grid=grid,

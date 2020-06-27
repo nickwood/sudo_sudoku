@@ -86,6 +86,15 @@ def cells_in_box(cell, inc=True):
         return box - {cell}
 
 
+def in_same_box(group):
+    'return True if all cells in group are in the same box, False otherwise'
+    box_containing_first = cells_in_box(group.copy().pop())
+    for c in group:
+        if c not in box_containing_first:
+            return False
+    return True
+
+
 @lru_cache(None)
 def all_neighbours(*, cell, inc=True):
     return (cells_in_row(cell=cell, inc=inc) |
@@ -126,6 +135,7 @@ class Game:
                    'naked_triples': self.find_naked_triples,
                    'naked_quads': self.find_naked_quads,
                    'pointing_multiples': self.find_pointing_multiples,
+                   'box_line_reductions': self.find_box_line_reductions,
                    'x_wings': self.find_x_wings}
         return [m for k, m in methods.items()
                 if solvers.get(k) is True or solvers.get(k) == 'True']
@@ -150,7 +160,7 @@ class Game:
         return True
 
     def solve_step(self):
-        # print({k: v for k, v in self.grid.items() if v != ''})
+        print({k: v for k, v in self.grid.items() if v != ''})
         for method in self.solvers:
             if method() is True:
                 return True
@@ -324,6 +334,27 @@ class Game:
 
         if pointing_multiples:
             for (cells, v) in pointing_multiples:
+                self.remove_candidates(group=cells, values={v})
+            return True
+        else:
+            return False
+
+    def find_box_line_reductions(self):
+        bl_reductions = set()
+        for line in chain(row_iterator(), col_iterator()):
+            for cand in self.candidates_in_group(group=line):
+                cwc = self.cells_with_candidate(group=line, value=cand)
+                if in_same_box(group=cwc):
+                    rest_of_box = cells_in_box(next(iter(cwc))) - cwc
+                    rest_with_c = self.cells_with_candidate(group=rest_of_box,
+                                                            value=cand)
+                    if rest_with_c:
+                        self.logs.append(f"Box-line reduction with "
+                                         f" {cwc}: {cand}. "
+                                         f"Removing from {list(rest_with_c)}")
+                        bl_reductions.add((frozenset(rest_with_c), cand))
+        if bl_reductions:
+            for (cells, v) in bl_reductions:
                 self.remove_candidates(group=cells, values={v})
             return True
         else:

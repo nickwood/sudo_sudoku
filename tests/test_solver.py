@@ -121,6 +121,21 @@ def test_cells_in_box():
     assert solver.cells_in_box(cell='J7', inc=False) == box_j7 - {'J7'}
 
 
+def test_in_same_box():
+    assert solver.in_same_box(group=['A1', 'A2', 'B3'])
+    assert solver.in_same_box(group=['A1', 'B3', 'C2'])
+    assert solver.in_same_box(group=['F3', 'F3', 'G6']) is False
+    assert solver.in_same_box(group=['F1', 'F2', 'F3', 'F4', 'F5']) is False
+    assert solver.in_same_box(group=['F1', 'F2', 'F3'])
+    assert solver.in_same_box(group={'G4', 'G5', 'E6'}) is False
+    assert solver.in_same_box(group={'A1', 'A5'}) is False
+    assert solver.in_same_box(group=['J8', 'H9', 'B7']) is False
+    assert solver.in_same_box(group=box_a1)
+    assert solver.in_same_box(group=row_j7) is False
+    assert solver.in_same_box(group=col_d3) is False
+    assert solver.in_same_box(group=all_d3) is False
+
+
 def test_all_neighbours():
     assert solver.all_neighbours(cell='A1') == all_a1
     assert solver.all_neighbours(cell='D3') == all_d3
@@ -446,6 +461,33 @@ def test_pointing_multiples():
             assert '3' not in game.candidates_in_group(group=expected_3)
         for c in expected_9:
             assert '9' not in game.candidates_in_group(group=expected_9)
+
+
+GRID_BL_REDUCTION = {'B7': '6', 'J2': '9', 'E9': '3', 'G2': '4', 'H7': '2',
+                     'F1': '4', 'G8': '8', 'A4': '9', 'D5': '8', 'C2': '5',
+                     'G3': '2', 'E1': '2', 'G9': '1', 'J4': '2', 'J7': '5',
+                     'C1': '7', 'F6': '2', 'B1': '9', 'E7': '4', 'C8': '4',
+                     'J6': '8', 'A6': '3', 'H6': '4', 'H3': '5', 'F4': '3',
+                     'J9': '4', 'A9': '5', 'A7': '7', 'H8': '6', 'D4': '4',
+                     'B3': '4', 'A8': '1', 'F5': '5', 'E8': '5', 'A5': '4',
+                     'A2': '2', 'D1': '5'}
+
+
+def test_box_line_reductions():
+    with GameInstance(grid=GRID_BL_REDUCTION) as game:
+        expected = {'1': {'H2', 'J3'},
+                    '3': {'H2', 'J3'},
+                    '6': {'E3', 'D3', 'F3', 'C3'},
+                    '7': {'J5', 'H4', 'H5'},
+                    '8': {'F2', 'F3', 'C3', 'B2'},
+                    '9': {'D9', 'F9', 'D7', 'F7'}}
+        for v, cells in expected.items():
+            for c in cells:
+                assert v in game.candidates_[c]
+        assert game.find_box_line_reductions()
+        for v, cells in expected.items():
+            for c in cells:
+                assert v not in game.candidates_[c]
 
 
 GRID_X_WING = {'E8': '5', 'A8': '1', 'G2': '6', 'D4': '2', 'H2': '8',

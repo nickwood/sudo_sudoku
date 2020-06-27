@@ -176,6 +176,9 @@ class Game:
         for cell in cells:
             self.invalid_cells.add(cell)
 
+    def remove_candidate(self, *, group, value):
+        self.remove_candidates(group=group, values={value})
+
     def remove_candidates(self, *, group, values):
         for c in group:
             if self.candidates_.get(c):
@@ -187,7 +190,7 @@ class Game:
         self.grid[cell] = value
         del self.candidates_[cell]
         to_update = self.unsolved_in_group(group=all_neighbours(cell=cell))
-        self.remove_candidates(group=to_update, values={value})
+        self.remove_candidate(group=to_update, value=value)
 
     def values_in_group(self, *, group):
         '''takes an iterator of cell references and returns the unique values
@@ -334,7 +337,7 @@ class Game:
 
         if pointing_multiples:
             for (cells, v) in pointing_multiples:
-                self.remove_candidates(group=cells, values={v})
+                self.remove_candidate(group=cells, value=v)
             return True
         else:
             return False
@@ -355,7 +358,7 @@ class Game:
                         bl_reductions.add((frozenset(rest_with_c), cand))
         if bl_reductions:
             for (cells, v) in bl_reductions:
-                self.remove_candidates(group=cells, values={v})
+                self.remove_candidate(group=cells, value=v)
             return True
         else:
             return False
@@ -393,7 +396,7 @@ class Game:
             for (rectangle, v, remove_from) in x_wings:
                 self.logs.append(f"X_wing at {rectangle}: removing {v} as "
                                  f"candidate from: {tuple(remove_from)}")
-                self.remove_candidates(group=remove_from, values={v})
+                self.remove_candidate(group=remove_from, value=v)
             return True
         else:
             return False

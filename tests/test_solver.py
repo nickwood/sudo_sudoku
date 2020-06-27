@@ -203,6 +203,16 @@ def test_add_error():
         assert game.invalid_cells == {'C6', 'D7', 'E8', 'F7'}
 
 
+def test_remove_candidate():
+    with GameInstance() as game:
+        game.remove_candidate(group=row_a1, value='2')
+        print(game.candidates_)
+        assert game.candidates_['A3'] == {'1'}
+        assert game.candidates_['A7'] == {'1', '3', '9'}
+        assert game.candidates_['A8'] == {'3'}
+        assert game.candidates_['A9'] == {'1', '3'}
+
+
 def test_remove_candidates():
     with GameInstance() as game:
         game.remove_candidates(group=row_a1, values={'2', '8', '7', '9'})
@@ -214,10 +224,10 @@ def test_remove_candidates():
 
 def test_add_to_grid():
     with GameInstance() as game:
-        game.remove_candidates = Mock()
+        game.remove_candidate = Mock()
         game.add_to_grid(cell='A3', value='1')
         assert game.grid['A3'] == '1'
-        game.remove_candidates.assert_called()
+        game.remove_candidate.assert_called()
 
 
 def test_values_in_group():

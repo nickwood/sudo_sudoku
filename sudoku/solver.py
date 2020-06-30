@@ -136,7 +136,8 @@ class Game:
                    'naked_quads': self.find_naked_quads,
                    'pointing_multiples': self.find_pointing_multiples,
                    'box_line_reductions': self.find_box_line_reductions,
-                   'x_wings': self.find_x_wings}
+                   'x_wings': self.find_x_wings,
+                   'y_wings': self.find_y_wings}
         return [m for k, m in methods.items()
                 if solvers.get(k) is True or solvers.get(k) == 'True']
 
@@ -160,7 +161,7 @@ class Game:
         return True
 
     def solve_step(self):
-        print({k: v for k, v in self.grid.items() if v != ''})
+        # print({k: v for k, v in self.grid.items() if v != ''})
         for method in self.solvers:
             if method() is True:
                 return True
@@ -203,7 +204,7 @@ class Game:
     def candidates_in_group(self, *, group):
         return set.union(*[self.candidates_.get(c, set()) for c in group])
 
-    def common_candidates_in_group(self, *, group):
+    def shared_candidates(self, *, group):
         return set.intersection(*[self.candidates_.get(c, set())
                                   for c in group])
 
@@ -366,7 +367,7 @@ class Game:
     def find_x_wings(self):
         x_wings = set()
         for rectangle in self.empty_rectangles():
-            shared_cands = self.common_candidates_in_group(group=rectangle)
+            shared_cands = self.shared_candidates(group=rectangle)
             for c in shared_cands:
                 # top left, top right, bottom left, bottom right
                 tl, tr, bl, br = rectangle
@@ -397,6 +398,41 @@ class Game:
                 self.logs.append(f"X_wing at {rectangle}: removing {v} as "
                                  f"candidate from: {tuple(remove_from)}")
                 self.remove_candidate(group=remove_from, value=v)
+            return True
+        else:
+            return False
+
+    def find_y_wings(self):
+        cells_with_two_candidates = {c: cands
+                                     for c, cands in self.candidates_.items()
+                                     if len(cands) == 2}
+
+        def shared(c1, c2):
+            return self.shared_candidates(group={c1, c2})
+
+        y_wings = set()
+        for cell in cells_with_two_candidates:
+            neighbours = all_neighbours(cell=cell, inc=False)
+            to_consider = {n for n in cells_with_two_candidates.keys()
+                           if n in neighbours
+                           if len(shared(n, cell)) == 1}
+
+            for n1, n2 in combinations(to_consider, 2):
+
+                if (shared(n1, cell) != shared(n2, cell)
+                        and (v := shared(n1, n2))):
+                    cand = next(iter(v))
+                    ucn = self.unsolved_common_neighbours(cells=(n1, n2))
+                    updates = self.cells_with_candidate(group=ucn, value=cand)
+                    if updates:
+                        self.logs.append(f"Y-wing with hinge at {cell}: "
+                                         f" wings: {n1} & {n2}. "
+                                         f"Removing {cand} from {updates}")
+                        y_wings.add((frozenset(updates), cand))
+
+        if y_wings:
+            for (cells, cand) in y_wings:
+                self.remove_candidate(group=cells, value=cand)
             return True
         else:
             return False

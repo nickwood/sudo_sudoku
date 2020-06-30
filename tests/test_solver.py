@@ -257,6 +257,16 @@ def test_candidates_in_group():
         assert cig(group=['J1', 'J2', 'J3']) == set(list('2478'))
 
 
+def test_shared_candidates():
+    with GameInstance() as game:
+        sc = game.shared_candidates
+        assert sc(group=['C1', 'C2']) == {'2', '4'}
+        assert sc(group=col_a1) == set()
+        assert sc(group=box_f7) == set()
+        assert sc(group=['C1', 'F7']) == set()
+        assert sc(group=['G1', 'H1', 'J1']) == {'4'}
+
+
 def test_solved_cell():
     with GameInstance() as game:
         assert game.solved_cell(cell='A1')
@@ -520,3 +530,24 @@ def test_find_x_wings():
             assert '4' in game.candidates_[c]
         assert game.find_x_wings()
         assert '4' not in game.candidates_in_group(group=expected_updates)
+
+
+GRID_Y_WING = {'J1': '1', 'H9': '7', 'G1': '2', 'D5': '1', 'A3': '2',
+               'H3': '9', 'E7': '6', 'J6': '6', 'H1': '6', 'H5': '8',
+               'D6': '8', 'B9': '8', 'C2': '7', 'A4': '8', 'F1': '7',
+               'F8': '2', 'C7': '4', 'H2': '4', 'J9': '2', 'C1': '8',
+               'G9': '6', 'D2': '2', 'F9': '9', 'G3': '8', 'G5': '3',
+               'A9': '1', 'C4': '3', 'F4': '5', 'H7': '3', 'D4': '6',
+               'D3': '3', 'G8': '4', 'G2': '5', 'E9': '3', 'D1': '9',
+               'F5': '4', 'J2': '3', 'D9': '4', 'J3': '7', 'J4': '4',
+               'B7': '2', 'B5': '6', 'C9': '5', 'E1': '4', 'F6': '3',
+               'C5': '2', 'B3': '4', 'A6': '4', 'G6': '7', 'E3': '5'}
+
+
+def test_find_y_wings():
+    with GameInstance(grid=GRID_Y_WING) as game:
+        assert '9' in game.candidates_['B8']
+        assert '9' in game.candidates_['A5']
+        assert game.find_y_wings()
+        assert '9' not in game.candidates_['B8']
+        assert '9' not in game.candidates_['A5']

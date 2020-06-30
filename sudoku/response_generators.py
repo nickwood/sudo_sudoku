@@ -10,7 +10,8 @@ DEFAULT_METHODS = {'naked_singles': True,
                    'naked_quads': True,
                    'pointing_multiples': True,
                    'box_line_reductions': True,
-                   'x_wings': True}
+                   'x_wings': True,
+                   'y_wings': True}
 
 
 def split_post(*, post_data):
@@ -81,9 +82,18 @@ demo_x = {'D3': '2', 'G5': '4', 'D6': '4', 'J7': '2', 'F6': '7', 'F7': '3',
           'J8': '4', 'J3': '7', 'G6': '2', 'E9': '5', 'C1': '2', 'C6': '1',
           'E4': '2', 'A3': '5', 'D7': '8', 'B5': '2', 'E7': '4', 'H3': '4',
           'J6': '9', 'C2': '9', 'G8': '6', 'G7': '5'}
+demo_y = {'J1': '1', 'C9': '5', 'B3': '4', 'J9': '2', 'C5': '2', 'J6': '6',
+          'F5': '4', 'J3': '7', 'J2': '3', 'A3': '2', 'D4': '6', 'B5': '6',
+          'C2': '7', 'C1': '8', 'E9': '3', 'G9': '6', 'G1': '2', 'A9': '1',
+          'B7': '2', 'D9': '4', 'H3': '9', 'G8': '4', 'J4': '4', 'D1': '9',
+          'G5': '3', 'E3': '5', 'E1': '4', 'A6': '4', 'H9': '7', 'F9': '9',
+          'H2': '4', 'F4': '5', 'D3': '3', 'E7': '6', 'F1': '7', 'G6': '7',
+          'F6': '3', 'C4': '3', 'F8': '2', 'D2': '2', 'H5': '8', 'A4': '8',
+          'G2': '5', 'D5': '1', 'B9': '8', 'C7': '4', 'D6': '8', 'H7': '3',
+          'G3': '8', 'H1': '6'}
 
 
-def render_defaults(*, grid=demo_bl_red, solvers=DEFAULT_METHODS,
+def render_defaults(*, grid=demo_pointing_pairs, solvers=DEFAULT_METHODS,
                     errors=None, invalid=None, logs=None):
     return render_template('base.html',
                            grid=grid,

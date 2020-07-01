@@ -10,6 +10,7 @@ pytest-cov = "*"
 radon = "*"
 pre-commit = "*"
 rope = "*"
+yapf = "*"
 
 [packages]
 flask = "*"

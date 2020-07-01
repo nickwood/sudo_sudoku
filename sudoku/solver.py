@@ -1,6 +1,5 @@
-from collections import defaultdict
 from itertools import chain, combinations, product
-from functools import lru_cache
+from sudoku.grid import Grid
 
 
 ALL_ROWS = frozenset('ABCDEFGHJ')
@@ -15,118 +14,22 @@ NAME_OF_MULTIPLE = {1: 'single',
                     4: 'quad'}
 
 
+# TODO MOVE TO RESPONSE GEN
 def invalid(*, grid):
     invalid = set()
-    for cell in grid_iterator():
+    for cell in Grid.grid_iterator():
         cell_value = grid.get(cell, '')
         if cell_value not in (ALL_VALUES | {''}):
             invalid.add(cell)
     return invalid
 
 
-def grid_iterator():
-    return (row + col for row in ALL_ROWS for col in ALL_COLS)
-
-
-def group_iterator():
-    for g in chain(row_iterator(), col_iterator(), box_iterator()):
-        yield g
-
-
-def row_iterator():
-    for c in ['A1', 'D2', 'G3', 'B4', 'E5', 'H6', 'C7', 'F8', 'J9']:
-        yield cells_in_row(cell=c)
-
-
-def col_iterator():
-    for c in ['A1', 'D2', 'G3', 'B4', 'E5', 'H6', 'C7', 'F8', 'J9']:
-        yield cells_in_col(cell=c)
-
-
-def box_iterator():
-    for c in ['A1', 'D2', 'G3', 'B4', 'E5', 'H6', 'C7', 'F8', 'J9']:
-        yield cells_in_box(cell=c)
-
-
-@lru_cache(None)
-def cells_in_row(cell, inc=True):
-    row, _ = cell
-    if inc:
-        return frozenset(row + col for col in ALL_COLS)
-    else:
-        return frozenset(row + col for col in ALL_COLS) - {cell}
-
-
-@lru_cache(None)
-def cells_in_col(cell, inc=True):
-    _, col = cell
-    if inc:
-        return frozenset(row + col for row in ALL_ROWS)
-    else:
-        return frozenset(row + col for row in ALL_ROWS) - {cell}
-
-
-@lru_cache(None)
-def cells_in_box(cell, inc=True):
-    row, col = cell
-    for i in COL_GROUPS:
-        if col in i:
-            col_group = i
-            break
-
-    for j in ROW_GROUPS:
-        if row in j:
-            row_group = j
-            break
-
-    box = frozenset(row + col for row in row_group for col in col_group)
-    if inc:
-        return box
-    else:
-        return box - {cell}
-
-
-def in_same_box(group):
-    'return True if all cells in group are in the same box, False otherwise'
-    box_containing_first = cells_in_box(group.copy().pop())
-    for c in group:
-        if c not in box_containing_first:
-            return False
-    return True
-
-
-@lru_cache(None)
-def all_neighbours(*, cell, inc=True):
-    return (cells_in_row(cell=cell, inc=inc) |
-            cells_in_col(cell=cell, inc=inc) |
-            cells_in_box(cell=cell, inc=inc))
-
-
-def common_neighbours(*, cells, inc=True):
-    neighbourhoods = [all_neighbours(cell=c, inc=inc)
-                      for c in cells]
-    return frozenset.intersection(*neighbourhoods)
-
-
-class Game:
+class Game(Grid):
     def __init__(self, *, grid, solvers=None):
-        self.initial_grid = grid.copy()
-        self.grid = grid
         self.errors = set()
-        self.invalid_cells = set()
-        self.candidates_ = self.init_candidates()
         self.logs = []
         self.solvers = self.init_solvers(solvers=solvers)
-
-    def init_candidates(self):
-        candidates = defaultdict(set)
-        grid = self.grid
-        for cell in grid_iterator():
-            if grid.get(cell, '') == '':
-                neighbours = all_neighbours(cell=cell)
-                values = self.values_not_in_group(group=neighbours)
-                candidates[cell] = values
-        return dict(candidates)
+        super().__init__(grid=grid)
 
     def init_solvers(self, *, solvers):
         methods = {'naked_singles': self.find_naked_singles,
@@ -152,16 +55,18 @@ class Game:
             return True
         else:
             self.add_error(msg='Unable to solve with current methods')
+            for k in sorted(self.candidates_.keys()):
+                print(f"{k}: {sorted(self.candidates_[k])}")
             return False
 
     def is_solved(self):
-        for group in group_iterator():
+        for group in Grid.group_iterator():
             if self.values_in_group(group=group) != ALL_VALUES:
                 return False
         return True
 
     def solve_step(self):
-        # print({k: v for k, v in self.grid.items() if v != ''})
+        print({k: v for k, v in self.grid.items() if v != ''})
         for method in self.solvers:
             if method() is True:
                 return True
@@ -174,71 +79,8 @@ class Game:
 
     def add_error(self, *, msg, cells={}):
         self.errors.add(msg)
-        for cell in cells:
-            self.invalid_cells.add(cell)
-
-    def remove_candidate(self, *, group, value):
-        self.remove_candidates(group=group, values={value})
-
-    def remove_candidates(self, *, group, values):
-        for c in group:
-            if self.candidates_.get(c):
-                self.candidates_[c] -= values
-
-    def add_to_grid(self, *, cell, value):
-        '''update the grid with the given cell & value, also removes this value
-        from the list of candidates for all it's neighbours'''
-        self.grid[cell] = value
-        del self.candidates_[cell]
-        to_update = self.unsolved_in_group(group=all_neighbours(cell=cell))
-        self.remove_candidate(group=to_update, value=value)
-
-    def values_in_group(self, *, group):
-        '''takes an iterator of cell references and returns the unique values
-        occupying those cells (ignores empty cells)'''
-        return set(self.grid.get(c, None) for c in group) - {None}
-
-    def values_not_in_group(self, *, group):
-        return set(ALL_VALUES - self.values_in_group(group=group))
-
-    def candidates_in_group(self, *, group):
-        return set.union(*[self.candidates_.get(c, set()) for c in group])
-
-    def shared_candidates(self, *, group):
-        return set.intersection(*[self.candidates_.get(c, set())
-                                  for c in group])
-
-    def solved_cell(self, *, cell):
-        '''return True if cell is solved (or provided) False otherwise'''
-        if self.grid.get(cell) in ALL_VALUES:
-            return True
-        else:
-            return False
-
-    def solved_in_group(self, *, group):
-        '''take a group of cells and return only those which are solved'''
-        return {c for c in group if self.solved_cell(cell=c)}
-
-    def unsolved_in_group(self, *, group):
-        '''take a group of cells and return only those which are unsolved'''
-        return {c for c in group if not self.solved_cell(cell=c)}
-
-    def unsolved_common_neighbours(self, *, cells):
-        return self.unsolved_in_group(group=common_neighbours(cells=cells,
-                                                              inc=False))
-
-    def cells_with_candidate(self, *, group, value):
-        '''return a set containing the cells in group which have 'value' as a
-        candidate'''
-        return {c for c in group if value in self.candidates_.get(c, set())}
-
-    def cells_with_candidates(self, *, group, values):
-        '''return a set containing the cells in group which any of 'values' in
-        their candidates'''
-        cells = set()
-        for v in values:
-            cells |= self.cells_with_candidate(group=group, value=v)
-        return cells
+        if cells:
+            self.add_invalid(cells=cells)
 
     def empty_rectangles(self):
         '''generator function which successively returns a group of 4 empty
@@ -247,7 +89,7 @@ class Game:
         0,1 & 2,3 will share rows and 0,2 and 1,3 share columns'''
         row_empties = {}
         for row_ref in ALL_ROWS:
-            row = cells_in_row(cell=row_ref+'1', inc=True)
+            row = Grid.cells_in_row(cell=row_ref+'1', inc=True)
             empties = {c[1] for c in self.unsolved_in_group(group=row)}
             edge_sets = (product(row_ref + comp_row_ref, col_refs)
                          for comp_row_ref, comp_empties in row_empties.items()
@@ -275,7 +117,7 @@ class Game:
 
     def find_naked_x(self, x):
         naked_x = set()
-        for group in group_iterator():
+        for group in Grid.group_iterator():
             unsolved = self.unsolved_in_group(group=group)
             if len(unsolved) <= x:
                 continue
@@ -308,7 +150,7 @@ class Game:
 
     def find_hidden_singles(self):
         hidden_singles = set()
-        for group in group_iterator():
+        for group in Grid.group_iterator():
             for cand in self.candidates_in_group(group=group):
                 possible = self.cells_with_candidate(group=group, value=cand)
                 if len(possible) == 1:
@@ -324,11 +166,11 @@ class Game:
 
     def find_pointing_multiples(self):
         pointing_multiples = set()
-        for box in box_iterator():
+        for box in Grid.box_iterator():
             for cand in self.candidates_in_group(group=box):
                 cwc = self.cells_with_candidate(group=box, value=cand)
                 # nobs = neighbours_outside_box
-                nobs = common_neighbours(cells=cwc) - box
+                nobs = Grid.common_neighbours(cells=cwc) - box
                 nobs_with_c = self.cells_with_candidate(group=nobs, value=cand)
                 if nobs_with_c:
                     self.logs.append(f"Pointing {NAME_OF_MULTIPLE[len(cwc)]} "
@@ -345,11 +187,11 @@ class Game:
 
     def find_box_line_reductions(self):
         bl_reductions = set()
-        for line in chain(row_iterator(), col_iterator()):
+        for line in chain(Grid.row_iterator(), Grid.col_iterator()):
             for cand in self.candidates_in_group(group=line):
                 cwc = self.cells_with_candidate(group=line, value=cand)
-                if in_same_box(group=cwc):
-                    rest_of_box = cells_in_box(next(iter(cwc))) - cwc
+                if Grid.in_same_box(group=cwc):
+                    rest_of_box = Grid.cells_in_box(next(iter(cwc))) - cwc
                     rest_with_c = self.cells_with_candidate(group=rest_of_box,
                                                             value=cand)
                     if rest_with_c:
@@ -371,10 +213,10 @@ class Game:
             for c in shared_cands:
                 # top left, top right, bottom left, bottom right
                 tl, tr, bl, br = rectangle
-                r1 = cells_in_row(tl)
-                r2 = cells_in_row(bl)
-                c1 = cells_in_col(tl)
-                c2 = cells_in_col(tr)
+                r1 = Grid.cells_in_row(tl)
+                r2 = Grid.cells_in_row(bl)
+                c1 = Grid.cells_in_col(tl)
+                c2 = Grid.cells_in_col(tr)
 
                 r1_with_c = self.cells_with_candidate(group=r1, value=c)
                 r2_with_c = self.cells_with_candidate(group=r2, value=c)
@@ -412,7 +254,7 @@ class Game:
 
         y_wings = set()
         for cell in cells_with_two_candidates:
-            neighbours = all_neighbours(cell=cell, inc=False)
+            neighbours = Grid.all_neighbours(cell=cell, inc=False)
             to_consider = {n for n in cells_with_two_candidates.keys()
                            if n in neighbours
                            if len(shared(n, cell)) == 1}

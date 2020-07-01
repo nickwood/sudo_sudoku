@@ -1,17 +1,10 @@
 from collections import ChainMap
 from flask import render_template
 from .solver import invalid, Game
+from sudoku import strategies
 
 
-DEFAULT_METHODS = {'naked_singles': True,
-                   'hidden_singles': True,
-                   'naked_pairs': True,
-                   'naked_triples': True,
-                   'naked_quads': True,
-                   'pointing_multiples': True,
-                   'box_line_reductions': True,
-                   'x_wings': True,
-                   'y_wings': True}
+DEFAULT_METHODS = {k: True for k in strategies.all()}
 
 
 def split_post(*, post_data):

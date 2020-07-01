@@ -1,5 +1,5 @@
 from collections import defaultdict
-from itertools import chain
+from itertools import chain, combinations, product
 from functools import lru_cache
 
 
@@ -180,3 +180,21 @@ class Grid(dict):
         for v in values:
             cells |= self.cells_with_candidate(group=group, value=v)
         return cells
+
+    def empty_rectangles(self):
+        '''generator function which successively returns a group of 4 empty
+        cells on the corners of a rectangle
+        NB. Due to the way these cells are found we can guarantee that elements
+        0,1 & 2,3 will share rows and 0,2 and 1,3 share columns'''
+        row_empties = {}
+        for row_ref in ALL_ROWS:
+            row = Grid.cells_in_row(cell=row_ref+'1', inc=True)
+            empties = {c[1] for c in self.unsolved_in_group(group=row)}
+            edge_sets = (product(row_ref + comp_row_ref, col_refs)
+                         for comp_row_ref, comp_empties in row_empties.items()
+                         if len(intersect := empties & comp_empties) >= 2
+                         for col_refs in combinations(intersect, 2))
+            for edge in edge_sets:
+                yield sorted([r+c for r, c in edge])
+
+            row_empties[row_ref] = empties

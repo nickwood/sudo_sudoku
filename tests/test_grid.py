@@ -197,6 +197,8 @@ def test_add_to_grid():
         game.add_to_grid(cell='A3', value='1')
         assert game.grid['A3'] == '1'
         game.remove_candidate.assert_called()
+        game.add_to_grid(cell='A3', value='3')
+        assert game.grid['A3'] == '3'
 
 
 def test_remove_candidate():
@@ -304,3 +306,10 @@ def test_cells_with_candidates():
         assert cwc(group=col_d3, values={'1', '5'}) == {'G3', 'A3'}
         assert cwc(group=box_f7, values={'2', '6'}) == {'F9', 'D9'}
         assert cwc(group=row_j7, values={'7', '2'}) == {'J1', 'J2', 'J3'}
+
+
+def test_empty_rectangles():
+    with GridInstance() as game:
+        rectangles = [r for r in game.empty_rectangles()]
+        assert len(rectangles) == 191
+        assert (['H1', 'H2', 'J1', 'J2'] in rectangles)

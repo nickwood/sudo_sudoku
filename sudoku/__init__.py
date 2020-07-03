@@ -1,5 +1,10 @@
 from flask import Flask, request
 from flask_scss import Scss
+
+from sudoku.grid import Grid
+from sudoku.solution import Solution
+
+__all__ = ['Grid', 'Solution']
 import sudoku.response_generators as response
 
 

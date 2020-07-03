@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from functools import partial
 from itertools import chain, combinations
-# from sudoku
+
 
 NAME_OF_MULTIPLE = {1: 'single',
                     2: 'pair',
@@ -20,6 +20,18 @@ def all():
                   'x_wing': XWing,
                   'y_wing': YWing}
     return STRATEGIES
+
+
+def default_params():
+    return {k: True for k in all()}
+
+
+def allowed(params={}):
+    if params:
+        return [m for k, m in all().items()
+                if params.get(k) is True or params.get(k) == 'True']
+    else:
+        return default_params()
 
 
 class Strategy(ABC):

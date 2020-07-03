@@ -1,12 +1,8 @@
-from sudoku.grid import Grid
+from sudoku import Grid
 from sudoku import strategies
 
 
 ALL_VALUES = frozenset('123456789')
-NAME_OF_MULTIPLE = {1: 'single',
-                    2: 'pair',
-                    3: 'triple',
-                    4: 'quad'}
 
 
 # TODO MOVE TO RESPONSE GEN
@@ -19,16 +15,12 @@ def invalid(*, grid):
     return invalid
 
 
-class Game(Grid):
+class Solution(Grid):
     def __init__(self, *, grid, solvers=None):
         self.errors = set()
         self.logs = []
-        self.init_solvers(solvers=solvers)
+        self.strategies_ = strategies.allowed(params=solvers)
         super().__init__(grid=grid)
-
-    def init_solvers(self, *, solvers):
-        self.solvers = [m for k, m in strategies.all().items()
-                        if solvers.get(k) is True or solvers.get(k) == 'True']
 
     def solve(self):
         changed = True
@@ -45,9 +37,9 @@ class Game(Grid):
 
     def solve_step(self):
         # print({k: v for k, v in self.grid.items() if v != ''})
-        for method in self.solvers:
-            current_strat = method(game=self, logs=self.logs)
-            if current_strat.attempt():
+        for strategy_ in self.strategies_:
+            strategy_(game=self, logs=self.logs)
+            if strategy_(game=self, logs=self.logs).attempt():
                 return True
         return False
         # TODO: move to standalone method?

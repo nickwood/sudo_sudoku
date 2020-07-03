@@ -1,10 +1,10 @@
 from collections import ChainMap
 from flask import render_template
-from .solver import invalid, Game
-from sudoku import strategies
+from sudoku.solution import invalid, Solution
+from sudoku.strategies import default_params
 
 
-DEFAULT_METHODS = {k: True for k in strategies.all()}
+DEFAULT_METHODS = default_params()
 
 
 def split_post(*, post_data):
@@ -103,7 +103,7 @@ def do_solve(*, post_data):
                               solvers=solvers,
                               invalid=inv)
 
-    to_solve = Game(grid=grid, solvers=solvers)
+    to_solve = Solution(grid=grid, solvers=solvers)
     to_solve.solve()
     return render_defaults(grid=to_solve.grid,
                            solvers=solvers,
@@ -119,7 +119,7 @@ def do_step(*, post_data):
                               solvers=solvers,
                               invalid=inv)
 
-    to_solve = Game(grid=grid, solvers=solvers)
+    to_solve = Solution(grid=grid, solvers=solvers)
     to_solve.solve_step()
     return render_defaults(grid=to_solve.grid,
                            solvers=solvers,

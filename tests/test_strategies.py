@@ -1,8 +1,40 @@
 from sudoku import strategies
-from sudoku.grid import Grid
+from sudoku import Solution
 
 
-# TODO: test_all
+ALL_STRATEGIES = {'naked_single',
+                  'hidden_single',
+                  'naked_pair',
+                  'naked_triple',
+                  'naked_quad',
+                  'pointing_multiple',
+                  'box_line_reduction',
+                  'x_wing',
+                  'y_wing'}
+
+
+def test_all():
+    assert strategies.all().keys() == ALL_STRATEGIES
+
+
+def test_default_params():
+    assert strategies.default_params().keys() == ALL_STRATEGIES
+    for v in strategies.default_params().values():
+        assert v is True
+
+
+def test_allowed():
+    params = strategies.default_params()
+    params['box_line_reduction'] = 'False'
+    params['x_wing'] = False
+    params['y_wing'] = 'True'
+    act = strategies.allowed(params=params)
+    assert strategies.BoxLineReduction not in act
+    assert strategies.XWing not in act
+    assert strategies.YWing in act
+
+    act2 = strategies.allowed(params=None)
+    assert act2 == strategies.default_params()
 
 
 class GridInstance():
@@ -10,7 +42,7 @@ class GridInstance():
         self.grid = grid.copy()
 
     def __enter__(self):
-        g = Grid(grid=self.grid)
+        g = Solution(grid=self.grid)
         return g
 
     def __exit__(self, *args, **kwargs):

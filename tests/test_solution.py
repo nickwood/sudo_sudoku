@@ -1,4 +1,5 @@
-from sudoku import solver
+from sudoku import Solution
+from sudoku.strategies import default_params
 
 # TODO: move to response_gen tests
 # def test_split_post():
@@ -21,18 +22,16 @@ TEST_GRID = {'A1': '5', 'A2': '6', 'A4': '8', 'A5': '4', 'A6': '7', 'B1': '3',
              'F2': '5', 'F5': '3', 'F8': '9', 'G7': '2', 'H3': '6', 'H7': '8',
              'H9': '7', 'J4': '3', 'J5': '1', 'J6': '6', 'J8': '5', 'J9': '9'}
 
-DEFAULT_PARAMS = {'find_naked_singles': True,
-                  'find_hidden_singles': True,
-                  'find_naked_pairs': True}
+DEFAULT_STRATEGIES = default_params()
 
 
 class GameInstance():
-    def __init__(self, grid=TEST_GRID, solvers=DEFAULT_PARAMS):
+    def __init__(self, grid=TEST_GRID, solvers=DEFAULT_STRATEGIES):
         self.grid = grid.copy()
         self.solvers = solvers
 
     def __enter__(self):
-        g = solver.Game(grid=self.grid, solvers=self.solvers)
+        g = Solution(grid=self.grid, solvers=self.solvers)
         return g
 
     def __exit__(self, *args, **kwargs):

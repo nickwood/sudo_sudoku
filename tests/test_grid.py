@@ -313,3 +313,30 @@ def test_empty_rectangles():
         rectangles = [r for r in game.empty_rectangles()]
         assert len(rectangles) == 191
         assert (['H1', 'H2', 'J1', 'J2'] in rectangles)
+
+
+SOLVED = {'B1': '2', 'A5': '5', 'G1': '7', 'E7': '8', 'F1': '1', 'C2': '8',
+          'A7': '6', 'C9': '7', 'E9': '1', 'B8': '4', 'J4': '6', 'G3': '1',
+          'E5': '6', 'G5': '2', 'H8': '9', 'G7': '3', 'D6': '9', 'D9': '6',
+          'B6': '7', 'H4': '7', 'J2': '4', 'F7': '2', 'F2': '6', 'B3': '6',
+          'H6': '5', 'A4': '9', 'C4': '2', 'E4': '4', 'A3': '7', 'J5': '9',
+          'H7': '1', 'E3': '9', 'D8': '3', 'G6': '4', 'A8': '8', 'D4': '5',
+          'C1': '9', 'E2': '3', 'G4': '8', 'H9': '4', 'F3': '4', 'J3': '5',
+          'H3': '8', 'F6': '8', 'C8': '1', 'D7': '4', 'E8': '7', 'C6': '6',
+          'B2': '5', 'J9': '8', 'A1': '4', 'C7': '5', 'F4': '3', 'F9': '9',
+          'D5': '1', 'B9': '3', 'D1': '8', 'D2': '7', 'F8': '5', 'C5': '4',
+          'J8': '2', 'G9': '5', 'H5': '3', 'A2': '1', 'D3': '2', 'G8': '6',
+          'A9': '2', 'A6': '3', 'H1': '6', 'B7': '9', 'C3': '3', 'B4': '1',
+          'J7': '7', 'B5': '8', 'E1': '5', 'J6': '1', 'E6': '2', 'H2': '2',
+          'F5': '7', 'J1': '3', 'G2': '9'}
+
+
+def test_is_solved():
+    with GridInstance(grid=SOLVED) as game:
+        assert game.is_solved()
+        game.grid['G9'] = '4'
+        assert game.is_solved() is False
+        del game.grid['G9']
+        assert game.is_solved() is False
+        game.grid['G9'] = '5'
+        assert game.is_solved()

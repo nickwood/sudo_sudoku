@@ -198,3 +198,9 @@ class Grid(dict):
                 yield sorted([r+c for r, c in edge])
 
             row_empties[row_ref] = empties
+
+    def is_solved(self):
+        for group in Grid.group_iterator():
+            if self.values_in_group(group=group) != ALL_VALUES:
+                return False
+        return True

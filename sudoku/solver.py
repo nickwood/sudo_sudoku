@@ -41,15 +41,7 @@ class Game(Grid):
             return True
         else:
             self.add_error(msg='Unable to solve with current methods')
-            for k in sorted(self.candidates_.keys()):
-                print(f"{k}: {sorted(self.candidates_[k])}")
             return False
-
-    def is_solved(self):
-        for group in Grid.group_iterator():
-            if self.values_in_group(group=group) != ALL_VALUES:
-                return False
-        return True
 
     def solve_step(self):
         # print({k: v for k, v in self.grid.items() if v != ''})

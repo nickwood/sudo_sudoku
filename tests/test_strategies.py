@@ -31,7 +31,7 @@ def test_naked_single():
         assert game.grid.get('J7') is None
         assert game.grid.get('F7') is None
         assert game.grid.get('E5') is None
-        assert strategies.NakedSingle.attempt(grid=game, logs=[])
+        assert strategies.NakedSingle(game=game, logs=[]).attempt()
         assert game.grid['H8'] == '3'
         assert game.grid['J7'] == '4'
         assert game.grid['F7'] == '7'
@@ -40,7 +40,7 @@ def test_naked_single():
 
 def test_hidden_single():
     with GridInstance(grid=NAKED_SINGLES) as game:
-        assert strategies.HiddenSingle.attempt(grid=game, logs=[])
+        assert strategies.HiddenSingle(game=game, logs=[]).attempt()
         exp_singles = [('A7', '9'), ('F1', '8'), ('G3', '5'), ('B8', '8'),
                        ('C5', '6'), ('C6', '3'), ('G5', '7'), ('E3', '4'),
                        ('G6', '8'), ('H1', '1'), ('G8', '6'), ('G9', '1')]
@@ -70,7 +70,7 @@ def test_naked_pair():
         assert game.candidates_['A9'] == set(list('29'))
         assert game.candidates_['B9'] == set(list('236'))
         assert game.candidates_['C8'] == set(list('2369'))
-        assert strategies.NakedPair.attempt(grid=game, logs=[])
+        assert strategies.NakedX(game=game, logs=[], x=2).attempt()
         assert game.candidates_['A3'] == set(list('8'))
         assert game.candidates_['A4'] == set(list('4578'))
         assert game.candidates_['A5'] == set(list('458'))
@@ -107,7 +107,7 @@ def test_naked_triple():
         assert game.candidates_['E9'] == set(list('3789'))
         assert game.candidates_['F9'] == set(list('2358'))
         assert game.candidates_['H9'] == set(list('28'))
-        assert strategies.NakedTriple.attempt(grid=game, logs=[])
+        assert strategies.NakedX(game=game, logs=[], x=3).attempt()
         assert game.candidates_['H2'] == set(list('16'))
         assert game.candidates_['H3'] == set(list('16'))
         assert game.candidates_['J1'] == set(list('25'))
@@ -136,7 +136,7 @@ NAKED_QUAD = {'A5': '6', 'E5': '2', 'A2': '2', 'C4': '4', 'F6': '7',
 def test_naked_quad():
     # TODO: test_unhappy_path
     with GridInstance(grid=NAKED_QUAD) as game:
-        assert strategies.NakedQuad.attempt(grid=game, logs=[])
+        assert strategies.NakedX(game=game, logs=[], x=4).attempt()
         assert game.candidates_['A9'] == set(list('58'))
         assert game.candidates_['B9'] == set(list('79'))
         assert game.candidates_['D9'] == set(list('25'))
@@ -162,7 +162,7 @@ def test_pointing_multiple():
             assert '3' in game.candidates_[c]
         for c in expected_9:
             assert '9' in game.candidates_[c]
-        assert strategies.PointingMultiple.attempt(grid=game, logs=[])
+        assert strategies.PointingMultiple(game=game, logs=[]).attempt()
         for c in expected_3:
             assert '3' not in game.candidates_in_group(group=expected_3)
         for c in expected_9:
@@ -190,7 +190,7 @@ def test_box_line_reduction():
         for v, cells in expected.items():
             for c in cells:
                 assert v in game.candidates_[c]
-        assert strategies.BoxLineReduction.attempt(grid=game, logs=[])
+        assert strategies.BoxLineReduction(game=game, logs=[]).attempt()
         for v, cells in expected.items():
             for c in cells:
                 assert v not in game.candidates_[c]
@@ -214,7 +214,7 @@ def test_x_wing():
         expected_updates = ['A2', 'B2', 'F2', 'A5', 'B5', 'F5']
         for c in expected_updates:
             assert '4' in game.candidates_[c]
-        assert strategies.XWing.attempt(grid=game, logs=[])
+        assert strategies.XWing(game=game, logs=[]).attempt()
         assert '4' not in game.candidates_in_group(group=expected_updates)
 
 
@@ -234,6 +234,6 @@ def test_y_wing():
     with GridInstance(grid=Y_WING) as game:
         assert '9' in game.candidates_['B8']
         assert '9' in game.candidates_['A5']
-        assert strategies.YWing.attempt(grid=game, logs=[])
+        assert strategies.YWing(game=game, logs=[]).attempt()
         assert '9' not in game.candidates_['B8']
         assert '9' not in game.candidates_['A5']

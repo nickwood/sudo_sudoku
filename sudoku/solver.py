@@ -46,14 +46,15 @@ class Game(Grid):
     def solve_step(self):
         # print({k: v for k, v in self.grid.items() if v != ''})
         for method in self.solvers:
-            if method.attempt(grid=self, logs=self.logs) is True:
+            current_strat = method(game=self, logs=self.logs)
+            if current_strat.attempt():
                 return True
-
+        return False
         # TODO: move to standalone method?
-        for cell, candidates in self.candidates_.items():
-            if candidates == set():
-                msg = 'No remaining candidates for %s' % cell
-                self.add_error(msg=msg, cells={cell})
+        # for cell, candidates in self.candidates_.items():
+        #     if candidates == set():
+        #         msg = 'No remaining candidates for %s' % cell
+        #         self.add_error(msg=msg, cells={cell})
 
     def add_error(self, *, msg, cells={}):
         self.errors.add(msg)
